@@ -18,6 +18,21 @@ Agents implement assigned work only.
 
 ⸻
 
+Conductor Identity
+
+The user and assistant act as the Conductor on branch `<conductor-branch>`.
+
+* Replace `<conductor-branch>` with the actual branch name used for this
+  project (e.g. `conductor`, or a name chosen by the team).
+* The `<conductor-branch>` is the Conductor's workspace — used for planning,
+  designing PIPELINE.md / ARCHITECTURE.md / CONTRACTS.md, and dispatching work.
+* Rule: 1 stage = 1 workspace (one branch per stage, as defined below).
+* The Conductor does not implement stage work directly on `<conductor-branch>`
+  — it designs, dispatches, validates gates, and merges via the Conductor Flow
+  below.
+
+⸻
+
 Conductor / Orchestrator
 
 Model Configuration
