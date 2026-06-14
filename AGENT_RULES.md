@@ -61,10 +61,12 @@ well-scoped tasks that require no architectural judgment.
 
 Conductor Flow
 
-Each stage = one workspace (branch) = one PR = one merge into main.
+Each stage = one workspace (branch) = one PR = one merge into the target
+integration branch (`dev` if it exists, otherwise `main` — see PR Target
+Branch Check under Branch Rules).
 
-The next stage MUST NOT start until the previous stage is merged into main.
-This guarantees each workspace starts clean from main.
+The next stage MUST NOT start until the previous stage is merged into the
+target integration branch. This guarantees each workspace starts clean.
 
 Steps:
 
@@ -73,7 +75,7 @@ Steps:
 3. If REJECT: write rejection reason to rejection/state-[N]-[name].md; halt; do not advance
 4. If PASS: update PIPELINE.md — set Stage [N] Status = COMPLETE
 5. Write merge-approval/state-[N]-[name].md
-6. Wait for PR (feature/[domain]) to squash-merge into main
+6. Wait for PR (feature/[domain]) to squash-merge into the target integration branch (dev, else main)
 7. After merge confirmed: update PIPELINE.md — set Stage [N+1] Status = IN PROGRESS
 8. Write tasks/state-[N+1]-[name].md
 
@@ -96,7 +98,7 @@ Valid stage states:
 
 PENDING       Stage not yet reached — waiting for prior stage to complete
 IN PROGRESS   tasks/state-[N]-[name].md written — sub-agent is actively working
-COMPLETE      gate-out PASS + PR merged to main — immutable
+COMPLETE      gate-out PASS + PR merged to target integration branch (dev/main) — immutable
 BLOCKED       gate-out FAIL or validation rejected — requires resolution
 
 State Transitions
@@ -105,12 +107,12 @@ Only the conductor may update stage Status in PIPELINE.md.
 Sub-agents must NOT write to PIPELINE.md.
 
 PENDING → IN PROGRESS
-  Condition: prior stage Status = COMPLETE and PR merged to main
+  Condition: prior stage Status = COMPLETE and PR merged to target integration branch (dev/main)
   Action:    conductor writes tasks/state-[N]-[name].md
   Exception: Stage 1 starts as IN PROGRESS immediately (no prior stage)
 
 IN PROGRESS → COMPLETE
-  Condition: gate-out/state-[N]-[name].md Status = PASS and PR squash-merged to main
+  Condition: gate-out/state-[N]-[name].md Status = PASS and PR squash-merged to target integration branch (dev/main)
   Action:    conductor writes merge-approval/state-[N]-[name].md; updates PIPELINE.md
 
 IN PROGRESS → BLOCKED
@@ -140,7 +142,7 @@ tasks/state-[N]-[name].md written        →  stage becomes IN PROGRESS
 gate-out/state-[N]-[name].md Status = PASS →  stage eligible for COMPLETE
 gate-out/state-[N]-[name].md Status = FAIL →  stage becomes BLOCKED
 merge-approval/state-[N]-[name].md written →  PR ready to merge
-PR merged to main                          →  stage confirmed COMPLETE
+PR merged to target integration branch     →  stage confirmed COMPLETE
 
 ⸻
 
@@ -173,7 +175,7 @@ PR Description:
 [Checked list from PIPELINE.md — all must be checked]
 
 Merge Strategy: squash
-Base Branch: main
+Base Branch: dev (else main — see PR Target Branch Check under Branch Rules)
 Ready to Merge: YES
 
 ⸻
@@ -211,7 +213,8 @@ Constraints:
 - Branch from main only — do NOT branch from feature/[prior-domain]
 - STOP after assigned work is complete
 - Do NOT merge to dev/main directly
-- Create PR targeting main via feature/[domain]
+- Before opening PR: check if `dev` branch exists (git ls-remote --heads origin dev)
+- Create PR via feature/[domain] targeting dev if it exists, otherwise main
 
 ⸻
 
@@ -388,6 +391,26 @@ Create PR only.
 
 ⸻
 
+PR Target Branch Check (MANDATORY — before opening any PR)
+
+Before creating a PR, check whether a `dev` branch exists:
+
+```
+git ls-remote --heads origin dev
+```
+
+* If `dev` exists → target the PR to `dev` (not `main`)
+* If `dev` does NOT exist → target the PR to `main`
+
+Note: the developer integration branch (if it exists) is usually named `dev`,
+not a state/stage/process name (e.g. NOT `state-1`, NOT `feature/[domain]`).
+Always re-check before each PR — do not assume from a prior stage.
+
+Record the resolved target branch in gate-out/state-[N]-[name].md under
+"PR Target Branch".
+
+⸻
+
 Testing Rules
 
 Run relevant tests before completion.
@@ -499,6 +522,9 @@ Recommendations:
 
 Ready For Next Stage:
 YES | NO
+
+PR Target Branch:
+dev | main
 
 ⸻
 

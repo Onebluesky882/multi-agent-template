@@ -25,7 +25,7 @@
 <!-- What must be true before this stage can start -->
 
 **Dispatch-In:** `tasks/state-1-[name].md`
-<!-- Conductor writes this AFTER prior stage merges to main -->
+<!-- Conductor writes this AFTER prior stage PR is merged to dev (or main if dev does not exist) -->
 
 **Gate-Out:** `gate-out/state-1-[name].md`
 <!-- Agent writes this when stage is complete -->
