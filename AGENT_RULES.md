@@ -63,10 +63,11 @@ well-scoped tasks that require no architectural judgment.
 
 Conductor Flow
 
-Each stage = one workspace (branch) = one PR = one merge into main.
+Each stage = one workspace (branch) = one PR = one merge into `<conductor-branch>`.
 
-The next stage MUST NOT start until the previous stage is merged into main.
-This guarantees each workspace starts clean from main.
+The next stage MUST NOT start until the previous stage is merged into
+`<conductor-branch>`. This guarantees each workspace starts clean from
+`<conductor-branch>`.
 
 Steps:
 
@@ -75,7 +76,7 @@ Steps:
 3. If REJECT: write rejection reason to rejection/state-[N]-<domain>.md; halt; do not advance
 4. If PASS: update PIPELINE.md — set Stage [N] Status = COMPLETE
 5. Write merge-approval/state-[N]-<domain>.md
-6. Wait for PR (feature/[domain]) to squash-merge into main
+6. Wait for PR (feature/[domain]) to squash-merge into `<conductor-branch>`
 7. After merge confirmed: update PIPELINE.md — set Stage [N+1] Status = IN PROGRESS
 8. Write tasks/state-[N+1]-<domain>.md
 
@@ -98,7 +99,7 @@ Valid stage states:
 
 PENDING       Stage not yet reached — waiting for prior stage to complete
 IN PROGRESS   dispatch-in.md written — sub-agent is actively working
-COMPLETE      gate-out PASS + PR merged to main — immutable
+COMPLETE      gate-out PASS + PR merged to `<conductor-branch>` — immutable
 BLOCKED       gate-out FAIL or validation rejected — requires resolution
 
 State Transitions
@@ -107,12 +108,12 @@ Only the conductor may update stage Status in PIPELINE.md.
 Sub-agents must NOT write to PIPELINE.md.
 
 PENDING → IN PROGRESS
-  Condition: prior stage Status = COMPLETE and PR merged to main
+  Condition: prior stage Status = COMPLETE and PR merged to `<conductor-branch>`
   Action:    conductor writes tasks/state-[N]-<domain>.md
   Exception: Stage 1 starts as IN PROGRESS immediately (no prior stage)
 
 IN PROGRESS → COMPLETE
-  Condition: gate-out.md Status = PASS and PR squash-merged to main
+  Condition: gate-out.md Status = PASS and PR squash-merged to `<conductor-branch>`
   Action:    conductor writes merge-approval.md; updates PIPELINE.md
 
 IN PROGRESS → BLOCKED
@@ -142,7 +143,7 @@ dispatch-in.md written     →  stage becomes IN PROGRESS
 gate-out.md Status = PASS  →  stage eligible for COMPLETE
 gate-out.md Status = FAIL  →  stage becomes BLOCKED
 merge-approval.md written  →  PR ready to merge
-PR merged to main          →  stage confirmed COMPLETE
+PR merged to `<conductor-branch>` →  stage confirmed COMPLETE
 
 ⸻
 
@@ -175,7 +176,7 @@ PR Description:
 [Checked list from PIPELINE.md — all must be checked]
 
 Merge Strategy: squash
-Base Branch: main
+Base Branch: <conductor-branch>
 Ready to Merge: YES
 
 ⸻
@@ -193,7 +194,7 @@ Domain: [module/domain]
 Status: ASSIGNED
 Model: claude-opus-4-8
 
-Workspace: branch from main (after stage-[N] merged)
+Workspace: branch from `<conductor-branch>` (after stage-[N] merged)
 
 Context Files:
 - PROJECT.md
@@ -210,10 +211,10 @@ Prior Gate-Out: gate-out/state-[N]-<domain>.md  (N/A if this is Stage 1)
 Prior Merge: merge-approval/state-[N]-<domain>.md  (N/A if this is Stage 1)
 
 Constraints:
-- Branch from main only — do NOT branch from feature/[prior-domain]
+- Branch from `<conductor-branch>` only — do NOT branch from feature/[prior-domain]
 - STOP after assigned work is complete
-- Do NOT merge to dev/main directly
-- Create PR targeting main via feature/[domain]
+- Do NOT merge to dev/`<conductor-branch>` directly
+- Create PR targeting `<conductor-branch>` via feature/[domain]
 
 ⸻
 
@@ -384,7 +385,7 @@ feature/[name-3]
 Never merge directly into:
 
 * dev
-* main
+* `<conductor-branch>`
 
 Create PR only.
 
