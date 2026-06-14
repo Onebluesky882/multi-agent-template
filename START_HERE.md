@@ -52,8 +52,8 @@ This is your assigned stage.
 
 Record:
 
-* stage_id
-* stage_name
+* state_id (e.g. state-1, state-2a)
+* name (domain name, e.g. desktop-app)
 
 ⸻
 
@@ -61,7 +61,7 @@ Verify Gate-In
 
 Locate:
 
-tasks/<stage_id>/dispatch-in.md
+tasks/state-<N>-<name>.md
 
 Requirements:
 
@@ -119,11 +119,11 @@ Completion
 
 Create:
 
-tasks/<stage_id>/gate-out.md
+gate-out/state-<N>-<name>.md
 
 Required fields:
 
-stage_id:
+state_id:
 status: PASS | FAIL
 ready_for_next: YES | NO
 
@@ -155,7 +155,7 @@ STOP.
 
 Wait for:
 
-tasks/<stage_id>/merge-approval.md
+merge-approval/state-<N>-<name>.md
 
 Do not continue to another stage.
 

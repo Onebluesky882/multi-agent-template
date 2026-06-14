@@ -68,14 +68,14 @@ This guarantees each workspace starts clean from main.
 
 Steps:
 
-1. Read tasks/stage-[N]/gate-out.md from the completed stage
+1. Read gate-out/state-[N]-[name].md from the completed stage
 2. Validate all gate criteria (see Gate Validation Rules below)
-3. If REJECT: write rejection reason to tasks/stage-[N]/rejection.md; halt; do not advance
+3. If REJECT: write rejection reason to rejection/state-[N]-[name].md; halt; do not advance
 4. If PASS: update PIPELINE.md — set Stage [N] Status = COMPLETE
-5. Write tasks/stage-[N]/merge-approval.md
+5. Write merge-approval/state-[N]-[name].md
 6. Wait for PR (feature/[domain]) to squash-merge into main
 7. After merge confirmed: update PIPELINE.md — set Stage [N+1] Status = IN PROGRESS
-8. Write tasks/stage-[N+1]/dispatch-in.md
+8. Write tasks/state-[N+1]-[name].md
 
 Gate Validation Rules
 
@@ -95,7 +95,7 @@ Pipeline State Rules
 Valid stage states:
 
 PENDING       Stage not yet reached — waiting for prior stage to complete
-IN PROGRESS   dispatch-in.md written — sub-agent is actively working
+IN PROGRESS   tasks/state-[N]-[name].md written — sub-agent is actively working
 COMPLETE      gate-out PASS + PR merged to main — immutable
 BLOCKED       gate-out FAIL or validation rejected — requires resolution
 
@@ -106,20 +106,20 @@ Sub-agents must NOT write to PIPELINE.md.
 
 PENDING → IN PROGRESS
   Condition: prior stage Status = COMPLETE and PR merged to main
-  Action:    conductor writes tasks/stage-[N]/dispatch-in.md
+  Action:    conductor writes tasks/state-[N]-[name].md
   Exception: Stage 1 starts as IN PROGRESS immediately (no prior stage)
 
 IN PROGRESS → COMPLETE
-  Condition: gate-out.md Status = PASS and PR squash-merged to main
-  Action:    conductor writes merge-approval.md; updates PIPELINE.md
+  Condition: gate-out/state-[N]-[name].md Status = PASS and PR squash-merged to main
+  Action:    conductor writes merge-approval/state-[N]-[name].md; updates PIPELINE.md
 
 IN PROGRESS → BLOCKED
-  Condition: gate-out.md Status = FAIL or any gate criteria not met
-  Action:    conductor writes tasks/stage-[N]/rejection.md; updates PIPELINE.md
+  Condition: gate-out/state-[N]-[name].md Status = FAIL or any gate criteria not met
+  Action:    conductor writes rejection/state-[N]-[name].md; updates PIPELINE.md
 
 BLOCKED → IN PROGRESS
   Condition: human resolves blocking issue and explicitly approves re-dispatch
-  Action:    conductor re-writes tasks/stage-[N]/dispatch-in.md with updated context
+  Action:    conductor re-writes tasks/state-[N]-[name].md with updated context
 
 Immutability Rules
 
@@ -136,19 +136,19 @@ If a bug is found in a completed stage:
 
 Gate Artifact → State Mapping
 
-dispatch-in.md written     →  stage becomes IN PROGRESS
-gate-out.md Status = PASS  →  stage eligible for COMPLETE
-gate-out.md Status = FAIL  →  stage becomes BLOCKED
-merge-approval.md written  →  PR ready to merge
-PR merged to main          →  stage confirmed COMPLETE
+tasks/state-[N]-[name].md written        →  stage becomes IN PROGRESS
+gate-out/state-[N]-[name].md Status = PASS →  stage eligible for COMPLETE
+gate-out/state-[N]-[name].md Status = FAIL →  stage becomes BLOCKED
+merge-approval/state-[N]-[name].md written →  PR ready to merge
+PR merged to main                          →  stage confirmed COMPLETE
 
 ⸻
 
-Conductor Output — merge-approval.md
+Conductor Output — merge-approval/state-[N]-[name].md
 
 After gate validation passes, write:
 
-tasks/stage-[N]/merge-approval.md
+merge-approval/state-[N]-[name].md
 
 Format:
 
@@ -161,13 +161,13 @@ PR Title: feat([domain]): [one-line description]
 
 PR Description:
 ## What
-[What was implemented — from gate-out.md Summary]
+[What was implemented — from gate-out/state-[N]-[name].md Summary]
 
 ## Files Changed
-[List from gate-out.md Modified Files]
+[List from gate-out/state-[N]-[name].md Modified Files]
 
 ## Tests
-[List from gate-out.md Tests]
+[List from gate-out/state-[N]-[name].md Tests]
 
 ## Acceptance Criteria
 [Checked list from PIPELINE.md — all must be checked]
@@ -178,11 +178,11 @@ Ready to Merge: YES
 
 ⸻
 
-Conductor Output — dispatch-in.md
+Conductor Output — tasks/state-[N+1]-[name].md
 
-Only after merge-approval.md is confirmed merged, create:
+Only after merge-approval/state-[N]-[name].md is confirmed merged, create:
 
-tasks/stage-[N+1]/dispatch-in.md
+tasks/state-[N+1]-[name].md
 
 Format:
 
@@ -191,7 +191,7 @@ Domain: [module/domain]
 Status: ASSIGNED
 Model: claude-opus-4-8
 
-Workspace: branch from main (after stage-[N] merged)
+Workspace: branch from main (after state-[N] merged)
 
 Context Files:
 - PROJECT.md
@@ -204,8 +204,8 @@ Task:
 [Clear description of what the agent must implement]
 
 Gate-In Verified: YES
-Prior Gate-Out: tasks/stage-[N]/gate-out.md  (N/A if this is Stage 1)
-Prior Merge: tasks/stage-[N]/merge-approval.md  (N/A if this is Stage 1)
+Prior Gate-Out: gate-out/state-[N]-[name].md  (N/A if this is Stage 1)
+Prior Merge: merge-approval/state-[N]-[name].md  (N/A if this is Stage 1)
 
 Constraints:
 - Branch from main only — do NOT branch from feature/[prior-domain]
@@ -244,13 +244,13 @@ A task is Conductor-Only when it requires:
 
 Rules:
 
-* In PIPELINE.md and dispatch-in.md, mark such tasks explicitly:
+* In PIPELINE.md and tasks/state-[N]-[name].md, mark such tasks explicitly:
   `Owner: CONDUCTOR` (do not write `Owner: WORKER` or assign to a sub-agent)
 * Workers must NOT be dispatched tasks marked `Owner: CONDUCTOR`
 * If a worker discovers that completing their assigned task requires
   hardware access or cross-stage integration, they must STOP and report
-  it in gate-out.md under Known Issues — the conductor will perform that
-  part directly
+  it in gate-out/state-[N]-[name].md under Known Issues — the conductor
+  will perform that part directly
 
 ⸻
 
@@ -259,7 +259,7 @@ Worker Scope (1 Job = 1 Stage = 1 Workspace)
 Each worker:
 
 * Owns exactly one stage, one branch/workspace, one domain
-* Works ONLY on the task described in their tasks/stage-[N]/dispatch-in.md
+* Works ONLY on the task described in their tasks/state-[N]-[name].md
 * Must NOT pick up, merge, or test work belonging to other stages
 * Must NOT perform integration testing across modules — that is the
   conductor's responsibility (see Conductor-Only Tasks above)
@@ -349,7 +349,7 @@ Document:
 * version
 * reason
 
-inside gate-out.md
+inside gate-out/state-[N]-[name].md
 
 ⸻
 
@@ -457,9 +457,10 @@ Stage Completion
 
 When work is complete, create:
 
-tasks/stage-[N]/gate-out.md
+gate-out/state-[N]-[name].md
 
-Replace [N] with your assigned stage number from dispatch-in.md.
+Replace [N]-[name] with your assigned stage id and domain name from
+tasks/state-[N]-[name].md (e.g. tasks/state-1-desktop-app.md → gate-out/state-1-desktop-app.md).
 
 Format:
 
