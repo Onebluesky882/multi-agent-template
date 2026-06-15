@@ -30,6 +30,9 @@ You (the user) and I (this assistant) act as the Conductor on branch `<conductor
 * The `<conductor-branch>` is the Conductor's workspace — used for planning,
   designing PIPELINE.md/ARCHITECTURE.md/CONTRACTS.md, and dispatching work.
 * Rule: 1 stage = 1 workspace (one branch per stage, as defined below).
+* Stages with no dependency relationship (see `Depends On` in PIPELINE.md)
+  may run IN PROGRESS in parallel, each in its own workspace. A stage waits
+  only when it is listed in another stage's `Depends On`.
 * The Conductor does not implement stage work directly on `<conductor-branch>`
   — it designs, dispatches, validates gates, and merges via the flow below.
 
@@ -65,11 +68,19 @@ Conductor Flow
 
 Each stage = one workspace (branch) = one PR = one merge into `<conductor-branch>`.
 
-The next stage MUST NOT start until the previous stage is merged into
-`<conductor-branch>`. This guarantees each workspace starts clean from
-`<conductor-branch>`.
+A stage MUST NOT start until every stage listed in its `Depends On` field
+(PIPELINE.md) has reached COMPLETE and is merged into `<conductor-branch>`.
+This guarantees a dependent workspace starts clean from `<conductor-branch>`
+with the upstream work already present.
 
-Steps:
+If `Depends On: none`, the stage may start immediately. Multiple stages with
+`Depends On: none` (or whose dependencies are already COMPLETE) may be
+IN PROGRESS at the same time, each on its own branch — there is no
+requirement to wait for one independent stage to finish before starting
+another. A stage only waits when it is listed in another stage's
+`Depends On`.
+
+Steps (per completed stage):
 
 1. Read gate-out/state-[N]-<domain>.md from the completed stage
 2. Validate all gate criteria (see Gate Validation Rules below)
@@ -77,8 +88,10 @@ Steps:
 4. If PASS: update PIPELINE.md — set Stage [N] Status = COMPLETE
 5. Write merge-approval/state-[N]-<domain>.md
 6. Wait for PR (feature/[domain]) to squash-merge into `<conductor-branch>`
-7. After merge confirmed: update PIPELINE.md — set Stage [N+1] Status = IN PROGRESS
-8. Write tasks/state-[N+1]-<domain>.md
+7. After merge confirmed: for every PENDING stage whose `Depends On` is now
+   fully COMPLETE, update PIPELINE.md — set that stage's Status = IN PROGRESS
+8. Write tasks/state-[N]-<domain>.md for each such stage (one per stage; may
+   be done for several independent stages at once)
 
 Gate Validation Rules
 
@@ -97,7 +110,7 @@ Pipeline State Rules
 
 Valid stage states:
 
-PENDING       Stage not yet reached — waiting for prior stage to complete
+PENDING       Stage not yet reached — waiting for all stages in Depends On to complete
 IN PROGRESS   dispatch-in.md written — sub-agent is actively working
 COMPLETE      gate-out PASS + PR merged to `<conductor-branch>` — immutable
 BLOCKED       gate-out FAIL or validation rejected — requires resolution
@@ -108,9 +121,11 @@ Only the conductor may update stage Status in PIPELINE.md.
 Sub-agents must NOT write to PIPELINE.md.
 
 PENDING → IN PROGRESS
-  Condition: prior stage Status = COMPLETE and PR merged to `<conductor-branch>`
+  Condition: every stage listed in this stage's Depends On has Status = COMPLETE
+             and is merged to `<conductor-branch>` (Depends On: none = no condition)
   Action:    conductor writes tasks/state-[N]-<domain>.md
-  Exception: Stage 1 starts as IN PROGRESS immediately (no prior stage)
+  Exception: any stage with Depends On: none starts as IN PROGRESS immediately
+             and may run in parallel with other such stages
 
 IN PROGRESS → COMPLETE
   Condition: gate-out.md Status = PASS and PR squash-merged to `<conductor-branch>`
@@ -183,22 +198,28 @@ Ready to Merge: YES
 
 Conductor Output — dispatch-in.md
 
-Only after merge-approval.md is confirmed merged, create:
+Create tasks/state-[N]-<domain>.md only once every stage listed in this
+stage's `Depends On` is COMPLETE and merged (or immediately, if
+`Depends On: none`). The conductor may write dispatch-in.md for several
+independent stages in the same pass — they do not need to be dispatched
+one at a time.
 
-tasks/state-[N+1]-<domain>.md
+tasks/state-[N]-<domain>.md
 
 Format:
 
-Stage: [N+1]
+Stage: [N]
 Domain: [module/domain]
+Depends On: [state IDs, or none]
 Status: ASSIGNED
 Model: claude-opus-4-8
 
-Workspace: branch from `<conductor-branch>` (after stage-[N] merged)
+Workspace: branch from `<conductor-branch>` (after all Depends On stages merged,
+or immediately if Depends On: none)
 
 Context Files:
 - PROJECT.md
-- PIPELINE.md (Stage [N+1])
+- PIPELINE.md (Stage [N])
 - ARCHITECTURE.md
 - CONTRACTS.md
 - DECISIONS.md
@@ -207,11 +228,11 @@ Task:
 [Clear description of what the agent must implement]
 
 Gate-In Verified: YES
-Prior Gate-Out: gate-out/state-[N]-<domain>.md  (N/A if this is Stage 1)
-Prior Merge: merge-approval/state-[N]-<domain>.md  (N/A if this is Stage 1)
+Prior Gate-Out: gate-out/state-[dep]-<domain>.md for each Depends On stage (N/A if none)
+Prior Merge: merge-approval/state-[dep]-<domain>.md for each Depends On stage (N/A if none)
 
 Constraints:
-- Branch from `<conductor-branch>` only — do NOT branch from feature/[prior-domain]
+- Branch from `<conductor-branch>` only — do NOT branch from another stage's feature branch
 - STOP after assigned work is complete
 - Do NOT merge to dev/`<conductor-branch>` directly
 - Create PR targeting `<conductor-branch>` via feature/[domain]
@@ -266,6 +287,11 @@ Each worker:
 * Must NOT pick up, merge, or test work belonging to other stages
 * Must NOT perform integration testing across modules — that is the
   conductor's responsibility (see Conductor-Only Tasks above)
+* May run concurrently with other workers on independent stages
+  (Depends On: none, or whose dependencies are already merged) — no worker
+  needs to wait for an unrelated stage to finish
+* If their stage's `Depends On` is not yet COMPLETE/merged, the worker must
+  STOP and report `BLOCKED: WAITING_FOR_GATE_IN` rather than proceed
 
 ⸻
 
