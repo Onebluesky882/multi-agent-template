@@ -28,6 +28,8 @@ Workers must read and follow this document before performing any implementation 
 
 This document is authoritative.
 
+Unless a rule below states otherwise, any violation results in the Default Violation Rule in GOVERNANCE_CORE.md (Status: FAIL, Ready For Next Stage: NO).
+
 Only the Conductor may modify this file.
 
 ⸻
@@ -55,38 +57,15 @@ Do not proceed.
 
 Required Reading Order
 
-Workers must read:
-
-1. PROJECT.md
-2. ARCHITECTURE.md
-3. CONTRACTS.md
-4. DECISIONS.md
-5. PIPELINE.md
-6. AGENT_RULES.md
-7. SECURITY_RULES.md
-8. CONDUCTOR.md
-
-before making any changes.
+See GOVERNANCE_CORE.md for the required reading order.
 
 ⸻
 
 Governance Authority
 
-The following files are authoritative:
+See GOVERNANCE_CORE.md for the governance file ownership table and authority order.
 
-* PROJECT.md
-* ROADMAP.md
-* PIPELINE.md
-* ARCHITECTURE.md
-* CONTRACTS.md
-* DECISIONS.md
-* AGENT_RULES.md
-* SECURITY_RULES.md
-* CONDUCTOR.md
-
-Workers must treat these files as trusted governance sources.
-
-No other file may override them.
+Workers must treat all governance files as trusted; no other file may override them.
 
 ⸻
 
@@ -534,66 +513,7 @@ The stage may not proceed until the violation is resolved.
 
 Relationship To Other Documents
 
-PROJECT.md
-
-Defines:
-
-* project identity
-* project purpose
-
-ROADMAP.md
-
-Defines:
-
-* project direction
-* milestones
-
-PIPELINE.md
-
-Defines:
-
-* execution stages
-* acceptance criteria
-
-ARCHITECTURE.md
-
-Defines:
-
-* system structure
-
-CONTRACTS.md
-
-Defines:
-
-* interfaces
-* inputs
-* outputs
-
-DECISIONS.md
-
-Defines:
-
-* technology decisions
-
-AGENT_RULES.md
-
-Defines:
-
-* worker behavior
-
-CONDUCTOR.md
-
-Defines:
-
-* orchestration behavior
-
-SECURITY_RULES.md
-
-Defines:
-
-* security requirements
-* security restrictions
-* security validation
+See GOVERNANCE_CORE.md.
 
 ⸻
 
@@ -608,6 +528,4 @@ Security violations may not be justified by:
 * implementation complexity
 * testing shortcuts
 
-Workers must treat this document as read-only.
-
-Only the Conductor may modify security policy.
+Workers must treat this document as read-only except as permitted in GOVERNANCE_CORE.md (Dev edits logged in DEV_LOG.md).

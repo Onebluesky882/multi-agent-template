@@ -12,29 +12,15 @@ Defines worker behavior, execution boundaries, compliance requirements, and gove
 
 All workers must follow these rules.
 
+Unless a rule below states otherwise, any violation results in the Default Violation Rule in GOVERNANCE_CORE.md (Status: FAIL, Ready For Next Stage: NO).
+
 ⸻
 
 Governance Protection
 
-Workers may NOT modify:
+See GOVERNANCE_CORE.md for the governance file ownership table.
 
-* PROJECT.md
-* ROADMAP.md
-* PIPELINE.md
-* ARCHITECTURE.md
-* CONTRACTS.md
-* DECISIONS.md
-* SECURITY_RULES.md
-* AGENT_RULES.md
-* CONDUCTOR.md
-
-These files are Conductor-owned.
-
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
+Workers may NOT modify any governance file. Only Dev and Conductor may, per that table.
 
 ⸻
 
@@ -47,6 +33,14 @@ Each worker owns:
 * one domain
 
 Workers may not execute tasks outside assigned scope.
+
+⸻
+
+Main Branch Merge Authority
+
+Agents may NOT create, rename, delete, or re-point the main branch.
+
+main is owned exclusively by the dev.
 
 ⸻
 
@@ -74,12 +68,6 @@ Workers may NOT:
 
 without Conductor approval.
 
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
-
 ⸻
 
 Technology Freshness Compliance
@@ -97,12 +85,6 @@ Examples:
 
 * npm create vite@latest
 * npx create-expo-app@latest
-
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
 
 ⸻
 
@@ -166,12 +148,6 @@ Workers may NOT:
 
 Only the Conductor may create workers.
 
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
-
 ⸻
 
 Data Access Restrictions
@@ -185,12 +161,6 @@ Workers may NOT:
 * access secrets
 
 unless explicitly assigned.
-
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
 
 ⸻
 
@@ -208,12 +178,6 @@ unless explicitly defined in:
 
 * ARCHITECTURE.md
 * CONTRACTS.md
-
-Violation:
-
-Status: FAIL
-
-Ready For Next Stage: NO
 
 ⸻
 

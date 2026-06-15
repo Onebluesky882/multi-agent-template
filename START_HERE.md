@@ -35,19 +35,9 @@ You are responsible only for the assigned stage.
 
 Conductor Authority
 
-The Conductor owns:
+See GOVERNANCE_CORE.md for the governance file ownership table and authority order (Dev > Conductor > Workers).
 
-* PROJECT.md
-* ROADMAP.md
-* PIPELINE.md
-* ARCHITECTURE.md
-* CONTRACTS.md
-* DECISIONS.md
-* SECURITY_RULES.md
-* AGENT_RULES.md
-* CONDUCTOR.md
-
-Workers must treat these files as read-only.
+Workers must treat all governance files as read-only.
 
 ⸻
 
@@ -70,19 +60,9 @@ Do not:
 
 Required Reading Order
 
-Read these files in exact order:
+See GOVERNANCE_CORE.md for the required reading order.
 
-1. PROJECT.md
-2. ROADMAP.md
-3. ARCHITECTURE.md
-4. CONTRACTS.md
-5. DECISIONS.md
-6. SECURITY_RULES.md
-7. AGENT_RULES.md
-8. PIPELINE.md
-9. CONDUCTOR.md
-
-Do not begin implementation before reading all files.
+Do not begin implementation before reading all files listed there.
 
 ⸻
 

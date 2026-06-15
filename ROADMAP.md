@@ -110,6 +110,22 @@ Success Indicators:
 
 ⸻
 
+Current Progress
+
+<!-- Conductor updates this section to summarize, in plain language, what has been completed so far. -->
+
+[TBD]
+
+⸻
+
+Next Steps
+
+<!-- Conductor updates this section to summarize, in plain language, what happens next. -->
+
+[TBD]
+
+⸻
+
 Guiding Principles
 
 1. Human governance first
@@ -189,16 +205,7 @@ Mitigation:
 
 Governance
 
-The following files are controlled exclusively by the Conductor:
-
-* PROJECT.md
-* ROADMAP.md
-* PIPELINE.md
-* ARCHITECTURE.md
-* CONTRACTS.md
-* DECISIONS.md
-
-Workers must treat these files as read-only.
+See GOVERNANCE_CORE.md for file ownership and the relationship between documents.
 
 ⸻
 
@@ -211,39 +218,7 @@ Changes to this roadmap require:
 3. Impact analysis
 4. Documentation update
 
-Workers may not modify ROADMAP.md.
-
-⸻
-
-Relationship To Other Documents
-
-PROJECT.md
-
-Defines project identity and purpose.
-
-ROADMAP.md
-
-Defines long-term direction and business goals.
-
-PIPELINE.md
-
-Defines execution stages and implementation progress.
-
-ARCHITECTURE.md
-
-Defines system structure.
-
-CONTRACTS.md
-
-Defines interfaces and contracts.
-
-DECISIONS.md
-
-Defines approved technical decisions.
-
-AGENT_RULES.md
-
-Defines worker operating rules.
+Workers may not modify ROADMAP.md. Dev may edit directly (see GOVERNANCE_CORE.md), logged in DEV_LOG.md.
 
 ⸻
 
@@ -263,4 +238,4 @@ ROADMAP.md is the source of truth for project direction.
 
 PIPELINE.md is the source of truth for project execution.
 
-Only the Conductor may modify project direction.
+See GOVERNANCE_CORE.md for authority order.
