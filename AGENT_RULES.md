@@ -38,6 +38,67 @@ You (the user) and I (this assistant) act as the Conductor on branch `<conductor
 
 ⸻
 
+Repository Layout — Pipeline Artifact Folders
+
+Each artifact type lives in its own top-level folder, flat-named
+`state-[N]-<domain>.md`. Do not nest per-stage subfolders — one file per
+stage per folder.
+
+```
+tasks/             Conductor -> Worker.  Dispatch instructions ("go").
+                    File: tasks/state-[N]-<domain>.md
+                    Written by: Conductor only.
+
+gate-out/          Worker -> Conductor.  Self-reported proof of completion
+                    (Status, tests, modified files, acceptance criteria,
+                    Ready For Next Stage).
+                    File: gate-out/state-[N]-<domain>.md
+                    Written by: the assigned Worker only.
+
+merge-approval/    Conductor -> reviewer/CI.  Written only after gate-out
+                    PASSes validation. Signals "PR is approved, merge it."
+                    File: merge-approval/state-[N]-<domain>.md
+                    Written by: Conductor only.
+
+rejection/         Conductor -> Worker.  Written when gate-out FAILs
+                    validation. Explains what must be fixed before
+                    re-dispatch.
+                    File: rejection/state-[N]-<domain>.md
+                    Written by: Conductor only.
+```
+
+Flow for a single stage:
+
+```
+tasks/state-N.md (conductor writes)
+        |
+        v
+   Worker implements, opens PR
+        |
+        v
+gate-out/state-N.md (worker writes: PASS|FAIL)
+        |
+   +----+----+
+   |         |
+ PASS       FAIL
+   |         |
+   v         v
+merge-approval/   rejection/state-N.md
+state-N.md        (conductor writes; stage -> BLOCKED;
+(conductor          worker fixes and re-submits gate-out)
+writes; PR
+squash-merged)
+   |
+   v
+stage -> COMPLETE in PIPELINE.md
+   |
+   v
+tasks/state-M.md written for any stage whose
+Depends On is now fully COMPLETE (may be several at once)
+```
+
+⸻
+
 Conductor / Orchestrator
 
 Model Configuration

@@ -1,9 +1,10 @@
 Stage: 1
 Domain: modules/[name-1]
+Depends On: none
 Status: ASSIGNED
 Model: claude-opus-4-8
 
-Workspace: branch from main (Stage 1 starts as IN PROGRESS immediately — no prior stage)
+Workspace: branch from `<conductor-branch>` (Stage 1 starts as IN PROGRESS immediately — no prior stage)
 
 Context Files:
 - PROJECT.md
@@ -20,7 +21,7 @@ Prior Gate-Out: N/A (this is Stage 1)
 Prior Merge: N/A (this is Stage 1)
 
 Constraints:
-- Branch from main only
+- Branch from `<conductor-branch>` only
 - STOP after assigned work is complete
-- Do NOT merge to dev/main directly
-- Create PR targeting main via feature/[name-1]
+- Do NOT merge to dev/`<conductor-branch>` directly
+- Create PR targeting `<conductor-branch>` via feature/[name-1]

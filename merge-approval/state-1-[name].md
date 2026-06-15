@@ -19,5 +19,5 @@ PR Description:
 [Checked list from PIPELINE.md — all must be checked]
 
 Merge Strategy: squash
-Base Branch: main
+Base Branch: <conductor-branch>
 Ready to Merge: YES
