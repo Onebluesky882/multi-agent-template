@@ -29,6 +29,7 @@ Governance File Ownership
 | CONDUCTOR.md | Conductor | Yes | Yes | Read-only |
 | DEV.md | Dev | Yes | No | Read-only |
 | DEV_LOG.md | Dev | Yes | No | Read-only |
+| GOVERNANCE_CORE.md | Dev | Yes | No | Read-only |
 
 Any direct Dev edit to a file above must be logged in DEV_LOG.md (see DEV.md).
 

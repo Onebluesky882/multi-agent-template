@@ -30,7 +30,7 @@ This document is authoritative.
 
 Unless a rule below states otherwise, any violation results in the Default Violation Rule in GOVERNANCE_CORE.md (Status: FAIL, Ready For Next Stage: NO).
 
-Only the Conductor may modify this file.
+See GOVERNANCE_CORE.md for who may edit this file.
 
 ⸻
 

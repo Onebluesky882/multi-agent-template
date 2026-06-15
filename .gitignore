@@ -15,3 +15,15 @@
 # Environment
 .env
 .env.local
+.env.production
+.env.development
+
+# Build artifacts (see AGENT_RULES.md Build Artifact Rules)
+node_modules/
+dist/
+build/
+.next/
+target/
+vendor/
+__pycache__/
+.venv/
