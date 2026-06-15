@@ -162,3 +162,23 @@ Do not continue to another stage.
 Do not self-approve.
 
 Do not merge.
+
+⸻
+
+Roadmap Protection
+
+ROADMAP.md is read-only for workers.
+
+Workers may:
+
+- read
+- reference
+
+Workers may NOT:
+
+- modify
+- update status
+- add milestones
+- remove milestones
+
+Only the Conductor may modify ROADMAP.md.
