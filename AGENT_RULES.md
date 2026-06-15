@@ -13,6 +13,7 @@ The orchestrator controls:
 * DECISIONS.md
 * ARCHITECTURE.md
 * CONTRACTS.md
+ 
 
 Agents implement assigned work only.
 
@@ -689,3 +690,55 @@ vendor/
 
 These rules apply to ALL agents and ALL stages.
 Pushing build artifacts inflates repo size by hundreds of MB and cannot be easily undone.
+
+⸻
+
+Roadmap Protection
+
+ROADMAP.md is read-only for workers.
+
+Workers may:
+
+- read
+- reference
+
+Workers may NOT:
+
+- modify
+- update status
+- add milestones
+- remove milestones
+
+Only the Conductor may modify ROADMAP.md.
+
+⸻
+
+Technology Stack Authority
+
+DECISIONS.md is the authoritative source for all technology decisions.
+
+Workers must follow all approved technologies defined in DECISIONS.md.
+
+Workers may NOT:
+
+* replace approved technologies
+
+* introduce alternative frameworks
+
+* substitute approved libraries
+
+* replace approved infrastructure components
+
+* change implementation technologies
+
+without explicit Conductor approval.
+
+Any implementation that differs from DECISIONS.md is considered non-compliant.
+
+Technology non-compliance automatically fails gate validation.
+
+Result:
+
+Status: FAIL
+
+Ready For Next Stage: NO

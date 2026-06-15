@@ -35,6 +35,8 @@ Read these files in exact order:
 4. DECISIONS.md
 5. PIPELINE.md
 6. AGENT_RULES.md
+7. SECURITY_RULES.md
+8. CONDUCTOR.md
 
 Do not continue until all files have been read.
 
@@ -163,32 +165,4 @@ Do not self-approve.
 
 Do not merge.
 
-⸻
 
-Roadmap Protection
-
-ROADMAP.md is read-only for workers.
-
-Workers may:
-
-- read
-- reference
-
-Workers may NOT:
-
-- modify
-- update status
-- add milestones
-- remove milestones
-
-Only the Conductor may modify ROADMAP.md.
-
-⸻
-
-Technology Stack Authority
-
-DECISIONS.md is the source of truth for technology selection.
-
-Using alternative frameworks, libraries, ORMs, databases, authentication providers, build tools, styling systems, or state management solutions is prohibited unless explicitly approved by the Conductor.
-
-Technology non-compliance automatically fails gate validation.
