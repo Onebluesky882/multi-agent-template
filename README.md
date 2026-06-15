@@ -16,8 +16,24 @@ agent owns exactly one pipeline stage, in its own branch, producing one PR.
 | `AGENT_RULES.md` | Conductor | Full workflow rules for all agents |
 | `START_HERE.md` | Worker | Onboarding instructions for worker agents |
 | `CLAUDE.md` | All agents | Project-level instructions loaded automatically |
-| `tasks/stage-[N]/` | Conductor/Worker | Per-stage dispatch and gate artifacts |
+| `tasks/state-[N]-<domain>.md` | Conductor | Dispatch instructions for a stage |
+| `gate-out/state-[N]-<domain>.md` | Worker | Self-reported proof of stage completion |
+| `merge-approval/state-[N]-<domain>.md` | Conductor | Approval to merge a stage's PR |
+| `rejection/state-[N]-<domain>.md` | Conductor | Reason a stage's gate-out failed |
 | `docs/adrs/` | Conductor/Worker | Architecture Decision Records |
+
+### Pipeline artifact folders
+
+```
+tasks/             Conductor -> Worker   "go" / dispatch instructions
+gate-out/          Worker -> Conductor   self-reported proof of completion
+merge-approval/    Conductor             approval to merge (after gate-out PASS)
+rejection/         Conductor             why gate-out FAILed, what to fix
+```
+
+Each folder holds one flat file per stage: `state-[N]-<domain>.md`.
+No per-stage subfolders. See "Repository Layout" in `AGENT_RULES.md` for
+the full flow diagram.
 
 ## Setup (before starting any stage)
 
@@ -31,49 +47,53 @@ agent owns exactly one pipeline stage, in its own branch, producing one PR.
 
 ## Running a stage (Conductor)
 
-1. Write `tasks/stage-[N]/dispatch-in.md` with:
-   - Stage number, domain, model
+1. Write `tasks/state-[N]-<domain>.md` with:
+   - Stage number, domain, `Depends On`, model
    - Context files to read
    - Task description
    - `Gate-In Verified: YES`
 2. Set the stage's `Status: IN PROGRESS` in `PIPELINE.md`.
 3. Dispatch the worker agent.
 
+Stages whose `Depends On` is already `none` or fully `COMPLETE` may be
+dispatched in parallel — write `tasks/state-[N]-<domain>.md` for each one.
+
 ## Running a stage (Worker)
 
 1. Read `START_HERE.md`.
 2. Read, in order: `PROJECT.md` → `ARCHITECTURE.md` → `CONTRACTS.md` →
    `DECISIONS.md` → `PIPELINE.md` → `AGENT_RULES.md`.
-3. Find your stage (`Status: IN PROGRESS`) and confirm `dispatch-in.md`
-   exists with `Gate-In Verified: YES`. If not, STOP and report
-   `BLOCKED: WAITING_FOR_GATE_IN`.
+3. Find your stage (`Status: IN PROGRESS`) and confirm
+   `tasks/state-[N]-<domain>.md` exists with `Gate-In Verified: YES`. If not,
+   STOP and report `BLOCKED: WAITING_FOR_GATE_IN`.
 4. Implement only what's in your assigned domain. Create a branch
    `feature/[domain]`.
 5. Run tests and build verification.
-6. Write `tasks/stage-[N]/gate-out.md` with status, modified files,
+6. Write `gate-out/state-[N]-<domain>.md` with status, modified files,
    tests run, acceptance criteria, known issues, and
    `Ready For Next Stage: YES|NO`.
 7. STOP. Do not merge, do not start the next stage.
 
 ## Gate validation (Conductor)
 
-1. Read `tasks/stage-[N]/gate-out.md`.
+1. Read `gate-out/state-[N]-<domain>.md`.
 2. PASS only if: `Status: PASS`, `Ready For Next Stage: YES`, all
    acceptance criteria checked, no blocking known issues.
-3. On REJECT: write `tasks/stage-[N]/rejection.md` and halt.
+3. On REJECT: write `rejection/state-[N]-<domain>.md` and halt.
 4. On PASS:
    - Update `PIPELINE.md` — Stage `[N]` → `COMPLETE`.
-   - Write `tasks/stage-[N]/merge-approval.md`.
-   - After the PR is squash-merged to `main`, update `PIPELINE.md` —
-     Stage `[N+1]` → `IN PROGRESS`.
-   - Write `tasks/stage-[N+1]/dispatch-in.md`.
+   - Write `merge-approval/state-[N]-<domain>.md`.
+   - After the PR is squash-merged to `<conductor-branch>`, for every
+     `PENDING` stage whose `Depends On` is now fully `COMPLETE`, update
+     `PIPELINE.md` → `IN PROGRESS` and write
+     `tasks/state-[M]-<domain>.md` (may be several stages at once).
 
 ## Conductor-only work
 
 Some tasks (cross-stage integration, end-to-end tests, hardware access)
 must never be dispatched to a worker. Mark these `Owner: CONDUCTOR` in
-`PIPELINE.md` and `dispatch-in.md` — see the "Conductor-Only Tasks" section
-of `AGENT_RULES.md`.
+`PIPELINE.md` and `tasks/state-[N]-<domain>.md` — see the "Conductor-Only
+Tasks" section of `AGENT_RULES.md`.
 
 ## ADRs
 
@@ -89,7 +109,10 @@ section of `CLAUDE.md`.
 
 ## Key rules at a glance
 
-- One stage = one branch = one PR = one merge into `main`.
+- One stage = one branch = one PR = one merge into `<conductor-branch>`.
+- A stage's `Depends On` (in `PIPELINE.md`) lists the stages it must wait
+  for. `Depends On: none` (or already-`COMPLETE` deps) means it can run in
+  parallel with other independent stages.
 - A `COMPLETE` stage is immutable — bugs become new stages, not edits.
 - Workers never touch `PIPELINE.md`, `CONTRACTS.md`, `DECISIONS.md`, or
   `ARCHITECTURE.md`.
