@@ -172,7 +172,7 @@ Pipeline State Rules
 Valid stage states:
 
 PENDING       Stage not yet reached — waiting for all stages in Depends On to complete
-IN PROGRESS   dispatch-in.md written — sub-agent is actively working
+IN PROGRESS   tasks/state-[N]-<domain>.md written — sub-agent is actively working
 COMPLETE      gate-out PASS + PR merged to `<conductor-branch>` — immutable
 BLOCKED       gate-out FAIL or validation rejected — requires resolution
 
@@ -189,8 +189,8 @@ PENDING → IN PROGRESS
              and may run in parallel with other such stages
 
 IN PROGRESS → COMPLETE
-  Condition: gate-out.md Status = PASS and PR squash-merged to `<conductor-branch>`
-  Action:    conductor writes merge-approval.md; updates PIPELINE.md
+  Condition: gate-out/state-[N]-<domain>.md Status = PASS and PR squash-merged to `<conductor-branch>`
+  Action:    conductor writes merge-approval/state-[N]-<domain>.md; updates PIPELINE.md
 
 IN PROGRESS → BLOCKED
   Condition: gate-out.md Status = FAIL or any gate criteria not met
@@ -215,11 +215,11 @@ If a bug is found in a completed stage:
 
 Gate Artifact → State Mapping
 
-dispatch-in.md written     →  stage becomes IN PROGRESS
-gate-out.md Status = PASS  →  stage eligible for COMPLETE
-gate-out.md Status = FAIL  →  stage becomes BLOCKED
-merge-approval.md written  →  PR ready to merge
-PR merged to `<conductor-branch>` →  stage confirmed COMPLETE
+tasks/state-[N]-<domain>.md written        →  stage becomes IN PROGRESS
+gate-out/state-[N]-<domain>.md Status = PASS  →  stage eligible for COMPLETE
+gate-out/state-[N]-<domain>.md Status = FAIL  →  stage becomes BLOCKED
+merge-approval/state-[N]-<domain>.md written  →  PR ready to merge
+PR merged to `<conductor-branch>`             →  stage confirmed COMPLETE
 
 ⸻
 
@@ -257,13 +257,13 @@ Ready to Merge: YES
 
 ⸻
 
-Conductor Output — dispatch-in.md
+Conductor Output — tasks/state-[N]-<domain>.md (dispatch-in)
 
 Create tasks/state-[N]-<domain>.md only once every stage listed in this
 stage's `Depends On` is COMPLETE and merged (or immediately, if
-`Depends On: none`). The conductor may write dispatch-in.md for several
-independent stages in the same pass — they do not need to be dispatched
-one at a time.
+`Depends On: none`). The conductor may write tasks/state-[N]-<domain>.md for
+several independent stages in the same pass — they do not need to be
+dispatched one at a time.
 
 tasks/state-[N]-<domain>.md
 
@@ -329,13 +329,13 @@ A task is Conductor-Only when it requires:
 
 Rules:
 
-* In PIPELINE.md and dispatch-in.md, mark such tasks explicitly:
+* In PIPELINE.md and tasks/state-[N]-<domain>.md, mark such tasks explicitly:
   `Owner: CONDUCTOR` (do not write `Owner: WORKER` or assign to a sub-agent)
 * Workers must NOT be dispatched tasks marked `Owner: CONDUCTOR`
 * If a worker discovers that completing their assigned task requires
   hardware access or cross-stage integration, they must STOP and report
-  it in gate-out.md under Known Issues — the conductor will perform that
-  part directly
+  it in gate-out/state-[N]-<domain>.md under Known Issues — the conductor
+  will perform that part directly
 
 ⸻
 
@@ -439,7 +439,7 @@ Document:
 * version
 * reason
 
-inside gate-out.md
+inside gate-out/state-[N]-<domain>.md
 
 ⸻
 
@@ -549,7 +549,7 @@ When work is complete, create:
 
 gate-out/state-[N]-<domain>.md
 
-Replace [N] with your assigned stage number from dispatch-in.md.
+Replace [N] with your assigned stage number from tasks/state-[N]-<domain>.md.
 
 Format:
 
