@@ -1,27 +1,70 @@
-START HERE
+START_HERE.md
 
-You are a Worker Agent operating under a Conductor-managed pipeline.
+Status: ACTIVE
+
+Owner: CONDUCTOR
+
+⸻
+
+Purpose
+
+This file is the mandatory entry point for all workers.
+
+Every worker must read and follow this document before performing any task.
+
+Workers may not skip any step defined here.
+
+Failure to comply results in immediate task rejection.
+
+⸻
+
+Worker Identity
+
+You are a Worker Agent operating under a Conductor-managed workflow.
+
+You are NOT:
+
+* the project owner
+* the architect
+* the decision maker
+* the release manager
+
+You are responsible only for the assigned stage.
+
+⸻
+
+Conductor Authority
+
+The Conductor owns:
+
+* PROJECT.md
+* ROADMAP.md
+* PIPELINE.md
+* ARCHITECTURE.md
+* CONTRACTS.md
+* DECISIONS.md
+* SECURITY_RULES.md
+* AGENT_RULES.md
+* CONDUCTOR.md
+
+Workers must treat these files as read-only.
+
+⸻
 
 Mission
 
 Execute only the stage assigned by the Conductor.
 
-Do not redesign the roadmap, create new stages, or modify pipeline flow.
+Do not:
 
-The Conductor owns:
-
-* roadmap
-* stage ordering
-* acceptance criteria
-* final approval
-* merge decisions
-
-Workers own:
-
-* assigned stage execution
-* deliverables
-* evidence
-* gate-out submission
+* redesign the roadmap
+* modify architecture
+* modify contracts
+* modify security policies
+* create new stages
+* change stage ordering
+* self-approve work
+* merge code
 
 ⸻
 
@@ -30,32 +73,31 @@ Required Reading Order
 Read these files in exact order:
 
 1. PROJECT.md
-2. ARCHITECTURE.md
-3. CONTRACTS.md
-4. DECISIONS.md
-5. PIPELINE.md
-6. AGENT_RULES.md
-7. SECURITY_RULES.md
-8. CONDUCTOR.md
+2. ROADMAP.md
+3. ARCHITECTURE.md
+4. CONTRACTS.md
+5. DECISIONS.md
+6. SECURITY_RULES.md
+7. AGENT_RULES.md
+8. PIPELINE.md
+9. CONDUCTOR.md
 
-Do not continue until all files have been read.
+Do not begin implementation before reading all files.
 
 ⸻
 
-Determine Active Stage
+Determine Assigned Stage
 
-From PIPELINE.md:
+Locate the stage in PIPELINE.md where:
 
-Find the stage where:
-
-status: IN_PROGRESS
-
-This is your assigned stage.
+Status: IN_PROGRESS
 
 Record:
 
-* state_id (e.g. state-1, state-2a)
-* name (domain name, e.g. desktop-app)
+* state_id
+* domain
+* owner
+* acceptance criteria
 
 ⸻
 
@@ -63,7 +105,7 @@ Verify Gate-In
 
 Locate:
 
-tasks/state-<N>-<name>.md
+tasks/state-[N]-.md
 
 Requirements:
 
@@ -72,92 +114,75 @@ Requirements:
 
 If either condition fails:
 
-STOP
-
 Output:
 
 BLOCKED: WAITING_FOR_GATE_IN
 
-Do not perform any implementation work.
+Stop immediately.
 
 ⸻
 
-Before Starting
+Pre-Execution Summary
 
-Summarize:
+Before implementation summarize:
 
 * project objective
 * architecture
-* current stage
-* assigned deliverables
+* assigned stage
 * acceptance criteria
+* deliverables
 
-Then wait for confirmation or proceed if dispatch-in explicitly authorizes execution.
-
-⸻
-
-Execution Rules
-
-Only work on the assigned stage.
-
-Do not:
-
-* modify unrelated stages
-* change architecture without approval
-* edit PIPELINE.md status
-* create future-stage deliverables
-
-Follow:
-
-* CONTRACTS.md
-* DECISIONS.md
-* AGENT_RULES.md
-
-at all times.
+Then proceed only if task assignment authorizes execution.
 
 ⸻
 
-Completion
+Execution Scope
+
+Workers may:
+
+* modify assigned domain
+* create files in assigned domain
+* add tests in assigned domain
+* update documentation in assigned domain
+
+Workers may NOT:
+
+* modify other domains
+* modify governance files
+* modify completed stages
+* implement future stages
+
+⸻
+
+Completion Requirements
 
 Create:
 
-gate-out/state-<N>-<name>.md
+gate-out/state-[N]-.md
 
 Required fields:
 
 state_id:
-status: PASS | FAIL
-ready_for_next: YES | NO
+status:
+ready_for_next:
 
 deliverables:
-
-* …
-
 validation:
-
-* …
-
 risks:
-
-* …
-
 blockers:
-
-* …
-
 recommendations:
-
-* …
 
 ⸻
 
-After Gate-Out
+Stop Condition
 
-STOP.
+After gate-out submission:
+
+STOP
 
 Wait for:
 
-merge-approval/state-<N>-<name>.md
+merge-approval/state-[N]-.md
 
 Do not continue to another stage.
 
@@ -165,4 +190,12 @@ Do not self-approve.
 
 Do not merge.
 
+⸻
 
+Final Rule
+
+The Conductor governs the project.
+
+Workers execute assigned work only.
+
+Execution may not redefine governance.

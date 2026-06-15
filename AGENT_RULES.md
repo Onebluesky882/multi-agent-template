@@ -1,428 +1,108 @@
 AGENT_RULES.md
 
+Status: ACTIVE
+
+Owner: CONDUCTOR
+
+⸻
+
 Purpose
 
-This repository uses a multi-agent workflow.
+Defines worker behavior, execution boundaries, compliance requirements, and governance protections.
 
-Every agent is a worker, not the owner of the project.
+All workers must follow these rules.
 
-The orchestrator controls:
+⸻
+
+Governance Protection
+
+Workers may NOT modify:
 
 * PROJECT.md
+* ROADMAP.md
 * PIPELINE.md
-* DECISIONS.md
 * ARCHITECTURE.md
 * CONTRACTS.md
- 
+* DECISIONS.md
+* SECURITY_RULES.md
+* AGENT_RULES.md
+* CONDUCTOR.md
 
-Agents implement assigned work only.
+These files are Conductor-owned.
 
-"Stage" refers to a pipeline unit of work; "state-N-<domain>" is its
-file-naming identifier.
+Violation:
 
-⸻
+Status: FAIL
 
-Conductor Identity
-
-You (the user) and I (this assistant) act as the Conductor on branch `<conductor-branch>`.
-
-* Replace `<conductor-branch>` with the actual branch name used for this
-  project (e.g. `conductor`, or a name chosen by the team).
-* The `<conductor-branch>` is the Conductor's workspace — used for planning,
-  designing PIPELINE.md/ARCHITECTURE.md/CONTRACTS.md, and dispatching work.
-* Rule: 1 stage = 1 workspace (one branch per stage, as defined below).
-* Stages with no dependency relationship (see `Depends On` in PIPELINE.md)
-  may run IN PROGRESS in parallel, each in its own workspace. A stage waits
-  only when it is listed in another stage's `Depends On`.
-* The Conductor does not implement stage work directly on `<conductor-branch>`
-  — it designs, dispatches, validates gates, and merges via the flow below.
+Ready For Next Stage: NO
 
 ⸻
 
-Repository Layout — Pipeline Artifact Folders
+Worker Scope
 
-Each artifact type lives in its own top-level folder, flat-named
-`state-[N]-<domain>.md`. Do not nest per-stage subfolders — one file per
-stage per folder.
+Each worker owns:
 
-```
-tasks/             Conductor -> Worker.  Dispatch instructions ("go").
-                    File: tasks/state-[N]-<domain>.md
-                    Written by: Conductor only.
+* one stage
+* one branch
+* one domain
 
-gate-out/          Worker -> Conductor.  Self-reported proof of completion
-                    (Status, tests, modified files, acceptance criteria,
-                    Ready For Next Stage).
-                    File: gate-out/state-[N]-<domain>.md
-                    Written by: the assigned Worker only.
-
-merge-approval/    Conductor -> reviewer/CI.  Written only after gate-out
-                    PASSes validation. Signals "PR is approved, merge it."
-                    File: merge-approval/state-[N]-<domain>.md
-                    Written by: Conductor only.
-
-rejection/         Conductor -> Worker.  Written when gate-out FAILs
-                    validation. Explains what must be fixed before
-                    re-dispatch.
-                    File: rejection/state-[N]-<domain>.md
-                    Written by: Conductor only.
-```
-
-Flow for a single stage:
-
-```
-tasks/state-N.md (conductor writes)
-        |
-        v
-   Worker implements, opens PR
-        |
-        v
-gate-out/state-N.md (worker writes: PASS|FAIL)
-        |
-   +----+----+
-   |         |
- PASS       FAIL
-   |         |
-   v         v
-merge-approval/   rejection/state-N.md
-state-N.md        (conductor writes; stage -> BLOCKED;
-(conductor          worker fixes and re-submits gate-out)
-writes; PR
-squash-merged)
-   |
-   v
-stage -> COMPLETE in PIPELINE.md
-   |
-   v
-tasks/state-M.md written for any stage whose
-Depends On is now fully COMPLETE (may be several at once)
-```
-
-⸻
-
-Conductor / Orchestrator
-
-Model Configuration
-
-```
-Model:         claude-opus-4-8
-thinking:      { type: "adaptive" }
-output_config: { effort: "xhigh" }
-```
-
-Use xhigh effort for planning and gate validation decisions.
-Use adaptive thinking — the conductor must reason about pipeline state.
-
-Sub-Agent Model Configuration (default)
-
-```
-Model:         claude-opus-4-8
-thinking:      { type: "adaptive" }
-output_config: { effort: "high" }
-```
-
-Downgrade to claude-sonnet-4-6 + effort: "high" only for simple,
-well-scoped tasks that require no architectural judgment.
-
-⸻
-
-Conductor Flow
-
-Each stage = one workspace (branch) = one PR = one merge into `<conductor-branch>`.
-
-A stage MUST NOT start until every stage listed in its `Depends On` field
-(PIPELINE.md) has reached COMPLETE and is merged into `<conductor-branch>`.
-This guarantees a dependent workspace starts clean from `<conductor-branch>`
-with the upstream work already present.
-
-If `Depends On: none`, the stage may start immediately. Multiple stages with
-`Depends On: none` (or whose dependencies are already COMPLETE) may be
-IN PROGRESS at the same time, each on its own branch — there is no
-requirement to wait for one independent stage to finish before starting
-another. A stage only waits when it is listed in another stage's
-`Depends On`.
-
-Steps (per completed stage):
-
-1. Read gate-out/state-[N]-<domain>.md from the completed stage
-2. Validate all gate criteria (see Gate Validation Rules below)
-3. If REJECT: write rejection reason to rejection/state-[N]-<domain>.md; halt; do not advance
-4. If PASS: update PIPELINE.md — set Stage [N] Status = COMPLETE
-5. Write merge-approval/state-[N]-<domain>.md
-6. Wait for PR (feature/[domain]) to squash-merge into `<conductor-branch>`
-7. After merge confirmed: for every PENDING stage whose `Depends On` is now
-   fully COMPLETE, update PIPELINE.md — set that stage's Status = IN PROGRESS
-8. Write tasks/state-[N]-<domain>.md for each such stage (one per stage; may
-   be done for several independent stages at once)
-
-Gate Validation Rules
-
-PASS only when ALL of the following are true:
-
-* gate-out.md Status = PASS
-* gate-out.md Ready For Next Stage = YES
-* All acceptance criteria in PIPELINE.md are checked off
-* No Known Issues that block the next stage
-
-If any check fails → Status = REJECT. Do not advance.
-
-⸻
-
-Pipeline State Rules
-
-Valid stage states:
-
-PENDING       Stage not yet reached — waiting for all stages in Depends On to complete
-IN PROGRESS   tasks/state-[N]-<domain>.md written — sub-agent is actively working
-COMPLETE      gate-out PASS + PR merged to `<conductor-branch>` — immutable
-BLOCKED       gate-out FAIL or validation rejected — requires resolution
-
-State Transitions
-
-Only the conductor may update stage Status in PIPELINE.md.
-Sub-agents must NOT write to PIPELINE.md.
-
-PENDING → IN PROGRESS
-  Condition: every stage listed in this stage's Depends On has Status = COMPLETE
-             and is merged to `<conductor-branch>` (Depends On: none = no condition)
-  Action:    conductor writes tasks/state-[N]-<domain>.md
-  Exception: any stage with Depends On: none starts as IN PROGRESS immediately
-             and may run in parallel with other such stages
-
-IN PROGRESS → COMPLETE
-  Condition: gate-out/state-[N]-<domain>.md Status = PASS and PR squash-merged to `<conductor-branch>`
-  Action:    conductor writes merge-approval/state-[N]-<domain>.md; updates PIPELINE.md
-
-IN PROGRESS → BLOCKED
-  Condition: gate-out.md Status = FAIL or any gate criteria not met
-  Action:    conductor writes rejection/state-[N]-<domain>.md; updates PIPELINE.md
-
-BLOCKED → IN PROGRESS
-  Condition: human resolves blocking issue and explicitly approves re-dispatch
-  Action:    conductor re-writes tasks/state-[N]-<domain>.md with updated context
-
-Immutability Rules
-
-COMPLETE stages are immutable.
-
-Once a stage is COMPLETE:
-* No agent may modify files in that stage's domain
-* No agent may re-open or re-run that stage
-* PIPELINE.md Status must remain COMPLETE
-
-If a bug is found in a completed stage:
-* Create a new stage entry in PIPELINE.md
-* Do not revert the COMPLETE status
-
-Gate Artifact → State Mapping
-
-tasks/state-[N]-<domain>.md written        →  stage becomes IN PROGRESS
-gate-out/state-[N]-<domain>.md Status = PASS  →  stage eligible for COMPLETE
-gate-out/state-[N]-<domain>.md Status = FAIL  →  stage becomes BLOCKED
-merge-approval/state-[N]-<domain>.md written  →  PR ready to merge
-PR merged to `<conductor-branch>`             →  stage confirmed COMPLETE
-
-⸻
-
-Conductor Output — merge-approval.md
-
-After gate validation passes, write:
-
-merge-approval/state-[N]-<domain>.md
-
-Format:
-
-Stage: [N]
-Domain: [module/domain]
-Branch: feature/[domain]
-Status: APPROVED
-
-PR Title: feat([domain]): [one-line description]
-
-PR Description:
-## What
-[What was implemented — from gate-out.md Summary]
-
-## Files Changed
-[List from gate-out.md Modified Files]
-
-## Tests
-[List from gate-out.md Tests]
-
-## Acceptance Criteria
-[Checked list from PIPELINE.md — all must be checked]
-
-Merge Strategy: squash
-Base Branch: <conductor-branch>
-Ready to Merge: YES
-
-⸻
-
-Conductor Output — tasks/state-[N]-<domain>.md (dispatch-in)
-
-Create tasks/state-[N]-<domain>.md only once every stage listed in this
-stage's `Depends On` is COMPLETE and merged (or immediately, if
-`Depends On: none`). The conductor may write tasks/state-[N]-<domain>.md for
-several independent stages in the same pass — they do not need to be
-dispatched one at a time.
-
-tasks/state-[N]-<domain>.md
-
-Format:
-
-Stage: [N]
-Domain: [module/domain]
-Depends On: [state IDs, or none]
-Status: ASSIGNED
-Model: claude-opus-4-8
-
-Workspace: branch from `<conductor-branch>` (after all Depends On stages merged,
-or immediately if Depends On: none)
-
-Context Files:
-- PROJECT.md
-- PIPELINE.md (Stage [N])
-- ARCHITECTURE.md
-- CONTRACTS.md
-- DECISIONS.md
-
-Task:
-[Clear description of what the agent must implement]
-
-Gate-In Verified: YES
-Prior Gate-Out: gate-out/state-[dep]-<domain>.md for each Depends On stage (N/A if none)
-Prior Merge: merge-approval/state-[dep]-<domain>.md for each Depends On stage (N/A if none)
-
-Constraints:
-- Branch from `<conductor-branch>` only — do NOT branch from another stage's feature branch
-- STOP after assigned work is complete
-- Do NOT merge to dev/`<conductor-branch>` directly
-- Create PR targeting `<conductor-branch>` via feature/[domain]
-
-⸻
-
-Required Reading
-
-Before starting any task, read:
-
-1. PROJECT.md
-2. ARCHITECTURE.md
-3. CONTRACTS.md
-4. DECISIONS.md
-5. PIPELINE.md
-
-Do not begin implementation before understanding these files.
-
-⸻
-
-Conductor-Only Tasks
-
-Some tasks must be performed by the conductor directly and must NOT be
-assigned to a worker (sub-agent).
-
-A task is Conductor-Only when it requires:
-
-* Integration / composition of functions produced by multiple stages
-* End-to-end or cross-module testing once all parts are combined
-* Direct interaction with physical hardware (camera, microphone, speaker,
-  sensors, etc.) that cannot be isolated to a single stage's workspace
-* Any verification that spans more than one stage's domain
-
-Rules:
-
-* In PIPELINE.md and tasks/state-[N]-<domain>.md, mark such tasks explicitly:
-  `Owner: CONDUCTOR` (do not write `Owner: WORKER` or assign to a sub-agent)
-* Workers must NOT be dispatched tasks marked `Owner: CONDUCTOR`
-* If a worker discovers that completing their assigned task requires
-  hardware access or cross-stage integration, they must STOP and report
-  it in gate-out/state-[N]-<domain>.md under Known Issues — the conductor
-  will perform that part directly
-
-⸻
-
-Worker Scope (1 Job = 1 Stage = 1 Workspace)
-
-Each worker:
-
-* Owns exactly one stage, one branch/workspace, one domain
-* Works ONLY on the task described in their tasks/state-[N]-<domain>.md
-* Must NOT pick up, merge, or test work belonging to other stages
-* Must NOT perform integration testing across modules — that is the
-  conductor's responsibility (see Conductor-Only Tasks above)
-* May run concurrently with other workers on independent stages
-  (Depends On: none, or whose dependencies are already merged) — no worker
-  needs to wait for an unrelated stage to finish
-* If their stage's `Depends On` is not yet COMPLETE/merged, the worker must
-  STOP and report `BLOCKED: WAITING_FOR_GATE_IN` rather than proceed
-
-⸻
-
-Conductor Integration Responsibility
-
-In addition to pipeline management (Gate Validation, merge approval,
-dispatch), the conductor is responsible for:
-
-* Composing/integrating the functions delivered by each completed stage
-* Running end-to-end tests across the combined system once stages are merged
-* Performing any Conductor-Only Task (see above), including hardware-dependent
-  testing (camera, speaker, microphone, etc.)
+Workers may not execute tasks outside assigned scope.
 
 ⸻
 
 Domain Ownership
 
-Each stage owns only its assigned domain.
+Workers may only modify files inside their assigned domain.
+
+Cross-domain changes require explicit Conductor approval.
+
+⸻
+
+Technology Stack Authority
+
+DECISIONS.md is authoritative.
+
+Workers must use approved technologies.
+
+Workers may NOT:
+
+* replace frameworks
+* replace libraries
+* replace databases
+* replace authentication systems
+* replace infrastructure
+
+without Conductor approval.
+
+Violation:
+
+Status: FAIL
+
+Ready For Next Stage: NO
+
+⸻
+
+Technology Freshness Compliance
+
+Workers must use the latest stable version of approved technologies unless DECISIONS.md explicitly pins a version.
+
+Workers may NOT:
+
+* use deprecated releases
+* use unsupported releases
+* use end-of-life releases
+* bootstrap projects from outdated templates
 
 Examples:
 
-Stage 1
-Domain:
-modules/[name-1]
+* npm create vite@latest
+* npx create-expo-app@latest
 
-Stage 2
-Domain:
-modules/[name-2]
+Violation:
 
-Stage 3
-Domain:
-modules/[name-3]
+Status: FAIL
 
-Do not modify another stage's implementation.
-
-⸻
-
-Allowed Changes
-
-You may:
-
-* Create files inside your assigned domain
-* Modify files inside your assigned domain
-* Add tests for your assigned domain
-* Update documentation for your assigned domain
-
-You may NOT:
-
-* Modify confirmed stages
-* Rewrite architecture
-* Change contracts
-* Change database schema without explicit instruction
-* Change public APIs without approval
-
-⸻
-
-Contract Compliance
-
-CONTRACTS.md is the source of truth.
-
-Input types and output types must match contracts exactly.
-
-If a contract appears incorrect:
-
-STOP
-
-Report the issue.
-
-Do not invent a new contract.
+Ready For Next Stage: NO
 
 ⸻
 
@@ -430,315 +110,160 @@ Dependency Rules
 
 Prefer existing dependencies.
 
-Do not add new dependencies unless required.
+Workers may not add dependencies unless required.
 
-If adding a dependency:
+If added:
 
 Document:
 
-* package name
+* package
 * version
 * reason
 
-inside gate-out/state-[N]-<domain>.md
+inside gate-out.md
 
 ⸻
 
-File Ownership
+Dependency Security
 
-Agent must report all modified files.
+Dependencies must originate from approved public registries or repositories approved by DECISIONS.md.
 
-Example:
-
-Modified Files:
-
-* modules/[name]/mod.rs
-* modules/[name]/client.rs
-* tests/[name]_test.rs
-
-⸻
-
-Branch Rules
-
-Agent branches:
-
-feature/
-
-Examples:
-
-feature/[name-1]
-feature/[name-2]
-feature/[name-3]
-
-Never merge directly into:
-
-* dev
-* `<conductor-branch>`
-
-Create PR only.
+Undocumented dependencies fail validation.
 
 ⸻
 
 Testing Rules
 
-Run relevant tests before completion.
-
 Required:
 
-* unit tests
 * build verification
+* unit tests
+* type checks
 
-If tests cannot run:
-
-Explain why.
-
-Never claim tests passed without execution.
+Workers may not claim tests passed unless executed.
 
 ⸻
 
 Error Handling
 
-Never panic intentionally.
+Applications must fail gracefully.
 
 Return structured errors.
 
-Example:
-
-{
-"error": "timeout contacting whisper api"
-}
-
-Applications must fail gracefully.
+Never intentionally crash systems.
 
 ⸻
 
-Architecture Rules
+Sub-Agent Restriction
 
-Follow ARCHITECTURE.md.
+Workers may NOT:
 
-Do not:
+* create new workers
+* dispatch new workers
+* generate autonomous agents
+* delegate tasks
+* create recursive execution chains
 
-* move modules
-* rename domains
-* redesign workflow
+Only the Conductor may create workers.
 
-unless explicitly instructed.
+Violation:
+
+Status: FAIL
+
+Ready For Next Stage: NO
 
 ⸻
 
-Decision Rules
+Data Access Restrictions
 
-DECISIONS.md is authoritative.
+Workers may NOT:
 
-If DECISIONS.md says:
+* export databases
+* dump tables
+* collect user data
+* access production data
+* access secrets
 
-Use Drizzle
+unless explicitly assigned.
 
-Do not switch to Prisma.
+Violation:
 
-If DECISIONS.md says:
+Status: FAIL
 
-Use Better Auth
+Ready For Next Stage: NO
 
-Do not switch to Auth.js.
+⸻
+
+Network Restrictions
+
+Workers may NOT:
+
+* expose public APIs
+* expose new ports
+* create admin endpoints
+* create debug endpoints
+* create export endpoints
+
+unless explicitly defined in:
+
+* ARCHITECTURE.md
+* CONTRACTS.md
+
+Violation:
+
+Status: FAIL
+
+Ready For Next Stage: NO
+
+⸻
+
+Security Authority
+
+SECURITY_RULES.md is authoritative.
+
+Workers must comply with all security requirements.
+
+Security violations automatically fail validation.
+
+⸻
+
+Build Artifact Rules
+
+Never commit:
+
+* node_modules/
+* dist/
+* build/
+* .next/
+* target/
+* vendor/
+* pycache/
+* .venv/
+
+Verify .gitignore before push.
 
 ⸻
 
 Stage Completion
 
-When work is complete, create:
+Worker must create:
 
-gate-out/state-[N]-<domain>.md
+gate-out/state-[N]-.md
 
-Replace [N] with your assigned stage number from tasks/state-[N]-<domain>.md.
+and provide:
 
-Format:
-
-Status:
-PASS | FAIL
-
-Stage:
-Domain:
-Summary:
-Modified Files:
-
-* file1
-* file2
-
-Dependencies Added:
-
-* none
-
-Tests:
-
-* test_a
-* test_b
-
-Acceptance Criteria:
-
-* Requirement 1
-* Requirement 2
-
-Known Issues:
-
-* none
-
-Recommendations:
-
-* optional
-
-Ready For Next Stage:
-YES | NO
+* modified files
+* tests
+* dependencies added
+* acceptance criteria status
+* known issues
 
 ⸻
 
-Stop Condition
+Final Rule
 
-After completing assigned work:
+Workers execute.
 
-STOP
+Conductor decides.
 
-Do not continue to the next stage.
-
-Do not implement future stages.
-
-Wait for orchestrator confirmation.
-
-⸻
-
-Multi-Model Compatibility
-
-Assume future contributors may include:
-
-* GPT
-* Claude
-* Gemini
-* Codex
-* Other agents
-
-Write code and documentation that is:
-
-* deterministic
-* explicit
-* easy to merge
-* easy to review
-
-Avoid hidden assumptions.
-
-⸻
-
-Merge Optimization
-
-Prefer:
-
-small focused commits
-
-Avoid:
-
-large refactors
-
-One stage should produce one logical PR.
-
-Keep changes isolated to the assigned domain.
-
-This reduces merge conflicts and improvements are easier to review.
-
-⸻
-
-Git & Build Artifacts
-
-NEVER push build artifact directories to the repository.
-
-Prohibited directories (must never appear in git):
-
-* target/          — Rust build output
-* node_modules/    — Node.js dependencies
-* dist/            — compiled output
-* build/           — build output
-* .next/           — Next.js build cache
-* __pycache__/     — Python bytecode cache
-* .venv/ / venv/   — Python virtual environments
-* vendor/          — Go/PHP vendored dependencies
-
-Pre-push checklist (MANDATORY):
-
-1. Verify .gitignore exists in the repo root before any git push
-2. Verify no artifact directories are tracked: git ls-files target/ node_modules/ dist/ build/ .next/ __pycache__/ .venv/ venv/ vendor/
-3. If any artifact directory is tracked, run BEFORE pushing:
-   git rm -r --cached <dir>
-   git commit -m "chore: remove tracked build artifacts"
-
-If .gitignore is missing:
-
-STOP — do not push.
-
-Create .gitignore first, add the artifact directories relevant to this
-project's stack, commit, then push.
-
-Minimum .gitignore entries (uncomment/adapt to your stack):
-
-/target
-node_modules/
-dist/
-build/
-.next/
-__pycache__/
-.venv/
-vendor/
-*.env
-*.env.local
-
-These rules apply to ALL agents and ALL stages.
-Pushing build artifacts inflates repo size by hundreds of MB and cannot be easily undone.
-
-⸻
-
-Roadmap Protection
-
-ROADMAP.md is read-only for workers.
-
-Workers may:
-
-- read
-- reference
-
-Workers may NOT:
-
-- modify
-- update status
-- add milestones
-- remove milestones
-
-Only the Conductor may modify ROADMAP.md.
-
-⸻
-
-Technology Stack Authority
-
-DECISIONS.md is the authoritative source for all technology decisions.
-
-Workers must follow all approved technologies defined in DECISIONS.md.
-
-Workers may NOT:
-
-* replace approved technologies
-
-* introduce alternative frameworks
-
-* substitute approved libraries
-
-* replace approved infrastructure components
-
-* change implementation technologies
-
-without explicit Conductor approval.
-
-Any implementation that differs from DECISIONS.md is considered non-compliant.
-
-Technology non-compliance automatically fails gate validation.
-
-Result:
-
-Status: FAIL
-
-Ready For Next Stage: NO
+Governance overrides implementation.
