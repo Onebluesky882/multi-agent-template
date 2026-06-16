@@ -42,7 +42,42 @@ Technology Stack Authority
 
 DECISIONS.md is authoritative. Workers must use approved technologies and must NOT replace frameworks, libraries, databases, authentication systems, or infrastructure without Conductor approval.
 
-Workers must use the latest stable version of approved technologies unless DECISIONS.md explicitly pins a version. Workers may NOT use deprecated, unsupported, or end-of-life releases or bootstrap from outdated templates (e.g. use `npm create vite@latest`, `npx create-expo-app@latest`).
+⸻
+
+Version Policy — MANDATORY
+
+Workers must use the latest stable version of every package unless DECISIONS.md explicitly pins a version.
+
+**Workers may NOT rely on memory or training data for version numbers** — versions known at training time are outdated. Always verify at runtime.
+
+Before installing any package, run the appropriate check:
+
+```bash
+# npm
+npm info <package> version
+
+# pip
+pip index versions <package>
+
+# cargo
+cargo search <package>
+```
+
+Bootstrap commands must always use `@latest`:
+
+```bash
+npm create vite@latest
+npx create-expo-app@latest
+npx create-next-app@latest
+```
+
+Violations that result in Status: FAIL:
+* installing a package without running the version check above
+* using a pinned version not declared in DECISIONS.md
+* bootstrapping from a template without `@latest`
+* claiming "latest" without evidence from the check command
+
+Workers must include the verified version number in `dependencies_added` in gate-out.
 
 ⸻
 
