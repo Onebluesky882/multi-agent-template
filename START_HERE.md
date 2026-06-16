@@ -80,18 +80,7 @@ Workers may NOT: modify other domains, governance files, completed stages, or im
 
 Completion Requirements
 
-Create `gate-out/stage-[N]-<domain>.md` with:
-
-```
-stage_id:
-status:
-ready_for_next:
-deliverables:
-validation:
-risks:
-blockers:
-recommendations:
-```
+Create `gate-out/stage-[N]-<domain>.md` using the template in AGENT_RULES.md → Stage Completion section. All fields are required.
 
 ⸻
 

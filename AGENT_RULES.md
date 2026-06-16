@@ -84,12 +84,23 @@ Never commit: `node_modules/`, `dist/`, `build/`, `.next/`, `target/`, `vendor/`
 
 Stage Completion
 
-Worker must create `gate-out/stage-[N]-<domain>.md` and provide:
-* modified files
-* tests run
-* dependencies added
-* acceptance criteria status
-* known issues
+Worker must create `gate-out/stage-[N]-<domain>.md` using this template:
+
+```
+stage_id:
+status:                    # PASS | FAIL
+ready_for_next:            # YES | NO
+modified_files:
+tests_run:
+dependencies_added:        # package, version, reason — or "none"
+acceptance_criteria:       # list each criterion: PASS | FAIL
+known_issues:              # or "none"
+risks:
+blockers:
+recommendations:
+```
+
+All fields are required. Empty fields must be explicitly set to "none" or "N/A".
 
 ⸻
 
