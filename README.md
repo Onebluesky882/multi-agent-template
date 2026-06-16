@@ -1,8 +1,6 @@
 # Multi-Agent AI Template
 
-A starter template for running a project with a **Dev / Conductor / Worker** multi-agent
-workflow. Dev sets direction; the Conductor orchestrates stages and gates; each Worker
-owns exactly one pipeline stage, in its own branch, producing one PR.
+A starter template for running a project with a **Dev / Conductor / Worker** multi-agent workflow. Dev sets direction; the Conductor orchestrates stages and gates; each Worker owns exactly one pipeline stage, in its own branch, producing one PR.
 
 ## Authority Order
 
@@ -10,138 +8,185 @@ owns exactly one pipeline stage, in its own branch, producing one PR.
 Dev  >  Conductor  >  Workers
 ```
 
-- **Dev** — project owner/human lead. Sets direction, workflow, design conventions, and tech stack.
-- **Conductor** — orchestrates Workers: dispatches, validates gates, merges PRs.
+- **Dev** — project owner/human lead. Sets direction, workflow, design conventions, and tech stack. Only Dev may pin package versions in `DECISIONS.md`.
+- **Conductor** — orchestrates Workers: dispatches, validates gates, merges PRs. Must not act until QUESTIONS.md is fully answered.
 - **Workers** — execute assigned stages only, within their defined domain.
+
+---
 
 ## Files
 
 | File | Owner | Purpose |
 |------|-------|---------|
-| `GOVERNANCE_CORE.md` | Dev | Shared governance reference — file ownership table, reading order, authority order |
-| `DEV.md` | Dev | Dev authority, override rules, edit logging requirements |
-| `DEV_LOG.md` | Dev | Log of direct Dev edits; Conductor reconciles against this |
+| `QUESTIONS.md` | Dev | Project setup questionnaire — must be answered before pipeline starts |
+| `GOVERNANCE_CORE.md` | Dev | File ownership table, reading order, authority order |
+| `DEV.md` | Dev | Dev authority, override rules, edit logging |
+| `DEV_LOG.md` | Dev | Log of all direct Dev edits; Conductor reconciles against this |
 | `PROJECT.md` | Conductor | Project goal, tech stack, current status |
-| `ROADMAP.md` | Conductor | Long-term direction, business goals, current progress, next steps |
+| `ROADMAP.md` | Conductor | Long-term direction, milestones, current progress |
 | `ARCHITECTURE.md` | Conductor | System architecture, modules, constraints |
 | `CONTRACTS.md` | Conductor | Public interfaces between modules |
-| `DECISIONS.md` | Conductor | Authoritative architectural decisions |
+| `DECISIONS.md` | Conductor | Architectural decisions + Pinned Versions table |
 | `SECURITY_RULES.md` | Conductor | Mandatory security requirements for all agents |
 | `PIPELINE.md` | Conductor | Stage list, status, acceptance criteria |
-| `AGENT_RULES.md` | Conductor | Full workflow rules for all agents |
-| `CONDUCTOR.md` | Conductor | Conductor role definition, responsibilities, and restrictions |
-| `START_HERE.md` | Worker | Onboarding instructions for worker agents |
+| `AGENT_RULES.md` | Conductor | Full workflow rules + gate-out template |
+| `CONDUCTOR.md` | Conductor | Conductor role, responsibilities, restrictions |
+| `START_HERE.md` | Worker | Mandatory worker onboarding entry point |
 | `CLAUDE.md` | All agents | Project-level instructions loaded automatically |
 | `tasks/stage-[N]-<domain>.md` | Conductor | Dispatch instructions for a stage |
 | `gate-out/stage-[N]-<domain>.md` | Worker | Self-reported proof of stage completion |
 | `merge-approval/stage-[N]-<domain>.md` | Conductor | Approval to merge a stage's PR |
-| `rejection/stage-[N]-<domain>.md` | Conductor | Reason a stage's gate-out failed |
+| `rejection/stage-[N]-<domain>.md` | Conductor | Reason a gate-out failed |
 | `docs/adrs/` | Conductor/Worker | Architecture Decision Records |
 
 ### Pipeline artifact folders
 
 ```
-tasks/             Conductor -> Worker   "go" / dispatch instructions
-gate-out/          Worker -> Conductor   self-reported proof of completion
-merge-approval/    Conductor             approval to merge (after gate-out PASS)
-rejection/         Conductor             why gate-out FAILed, what to fix
+tasks/             Conductor -> Worker   dispatch instructions
+gate-out/          Worker -> Conductor   proof of completion
+merge-approval/    Conductor             approval to merge
+rejection/         Conductor             why gate-out FAILed
 ```
 
-Each folder holds one flat file per stage: `stage-[N]-<domain>.md`.
-No per-stage subfolders.
+Each folder holds one flat file per stage: `stage-[N]-<domain>.md`. No subfolders.
+
+---
+
+## Setup — ทำก่อนเริ่ม pipeline
+
+### Step 1 — Dev ตอบ QUESTIONS.md
+
+เปิด `QUESTIONS.md` และตอบทุกคำถาม (29 ข้อ ใน 7 sections):
+
+| Section | ครอบคลุม | อัพเดทไฟล์ |
+|---------|---------|-----------|
+| 1 — Project Identity | ชื่อ, core problem, target users | PROJECT.md |
+| 2 — Tech Stack | ภาษา, framework, database, auth | DECISIONS.md |
+| 3 — Architecture | รูปแบบ, modules, external services | ARCHITECTURE.md, CONTRACTS.md |
+| 4 — Code Style | naming, linting, testing, TypeScript | DECISIONS.md |
+| 5 — Pipeline & Stages | stages, dependencies, conductor-branch ⚠️ | PIPELINE.md |
+| 6 — Roadmap | goals, vision, milestone | ROADMAP.md |
+| 7 — Security | sensitive data, environments, compliance | SECURITY_RULES.md |
+
+### Step 2 — Conductor อัพเดท governance files
+
+Conductor อ่านคำตอบและอัพเดททุกไฟล์ตาม Conductor Instructions ใน `QUESTIONS.md`
+
+### Step 3 — รัน Setup Test
+
+รัน Setup Test ทั้ง 8 ข้อใน `QUESTIONS.md` เพื่อยืนยันว่า governance พร้อมใช้งาน
+
+### PRE-FLIGHT CHECK (บังคับ)
+
+ทั้ง Conductor และ Worker จะ `BLOCKED: PROJECT NOT CONFIGURED` ถ้ายังพบ `<conductor-branch>` เป็น literal placeholder:
+
+```bash
+grep -rn "<conductor-branch>" PIPELINE.md PROJECT.md AGENT_RULES.md README.md
+```
+
+ต้องไม่มี output — ถ้ามีให้กลับไป Step 1
+
+---
 
 ## Required Reading Order (Workers)
 
-All workers must read, in order:
+ดู `GOVERNANCE_CORE.md` สำหรับ reading order ฉบับเต็ม (ไฟล์ 0–11)
 
-0. `GOVERNANCE_CORE.md`
-1. `PROJECT.md`
-2. `ROADMAP.md`
-3. `ARCHITECTURE.md`
-4. `CONTRACTS.md`
-5. `DECISIONS.md`
-6. `SECURITY_RULES.md`
-7. `AGENT_RULES.md`
-8. `PIPELINE.md`
-9. `CONDUCTOR.md`
-10. `DEV.md`
-11. `DEV_LOG.md`
-
-## Setup (before starting any stage)
-
-1. Fill in `PROJECT.md` — name, goal, tech stack, status.
-2. Fill in `ROADMAP.md` — long-term direction and milestones.
-3. Fill in `ARCHITECTURE.md` — modules, data flow, constraints.
-4. Fill in `CONTRACTS.md` — input/output contracts for each module.
-5. Fill in `DECISIONS.md` — any decisions agents must follow (libraries, frameworks, etc.).
-6. Fill in `SECURITY_RULES.md` — security requirements and restrictions.
-7. Define stages in `PIPELINE.md` — one row per stage, with domain and acceptance criteria.
-8. Replace `[name]` placeholders in `AGENT_RULES.md` (Domain Ownership, Branch Rules, File Ownership) with your actual module names.
+---
 
 ## Running a stage (Conductor)
 
-1. Confirm all `Depends On` stages are `COMPLETE` and merged.
-2. Write `tasks/stage-[N]-<domain>.md` with:
-   - Stage number, domain, `Depends On`, model
-   - Context files to read
-   - Task description
-   - `Gate-In Verified: YES`
-3. Set the stage's `Status: IN_PROGRESS` in `PIPELINE.md`.
-4. Dispatch the worker agent.
+1. ยืนยันว่า PRE-FLIGHT CHECK ผ่านแล้ว
+2. ยืนยันว่า `Depends On` stages ทั้งหมด `COMPLETE` และ merged แล้ว
+3. เขียน `tasks/stage-[N]-<domain>.md` — stage number, domain, Depends On, model, context files, task description, `Gate-In Verified: YES`
+4. ตั้ง `Status: IN_PROGRESS` ใน `PIPELINE.md`
+5. Dispatch worker agent
 
-Stages whose `Depends On` is `none` or fully `COMPLETE` may be dispatched in parallel.
+Stages ที่ `Depends On: none` หรือ deps ครบ `COMPLETE` dispatch ได้พร้อมกัน (parallel)
+
+---
 
 ## Running a stage (Worker)
 
-1. Read `START_HERE.md`.
-2. Read files in the required reading order above.
-3. Find your stage (`Status: IN_PROGRESS`) and confirm `tasks/stage-[N]-<domain>.md` exists with `Gate-In Verified: YES`. If not, STOP and report `BLOCKED: WAITING_FOR_GATE_IN`.
-4. Implement only what's in your assigned domain. Create branch `feature/[domain]`.
-5. Run tests and build verification.
-6. Write `gate-out/stage-[N]-<domain>.md` with status, modified files, tests run, acceptance criteria, known issues, and `Ready For Next Stage: YES|NO`.
-7. STOP. Do not merge, do not start the next stage.
+1. อ่าน `START_HERE.md` — PRE-FLIGHT CHECK จะรันที่นี่
+2. อ่านไฟล์ตาม reading order ใน `GOVERNANCE_CORE.md`
+3. หา stage ที่ `Status: IN_PROGRESS` และยืนยันว่า `tasks/stage-[N]-<domain>.md` มี `Gate-In Verified: YES` — ถ้าไม่มี STOP → `BLOCKED: WAITING_FOR_GATE_IN`
+4. Implement เฉพาะ assigned domain สร้าง branch `feature/[domain]`
+5. ตรวจ version ก่อนติด package ทุกตัว — ดู Version Policy ด้านล่าง
+6. รัน tests และ build verification
+7. สร้าง `gate-out/stage-[N]-<domain>.md` ตาม template ใน `AGENT_RULES.md → Stage Completion`
+8. STOP — ห้าม merge, ห้ามเริ่ม stage ถัดไป
+
+---
 
 ## Gate validation (Conductor)
 
-1. Read `gate-out/stage-[N]-<domain>.md`.
-2. PASS only if: `Status: PASS`, `Ready For Next Stage: YES`, all acceptance criteria checked, no blocking known issues, SECURITY_RULES.md compliance verified.
-3. On REJECT: write `rejection/stage-[N]-<domain>.md` and halt.
-4. On PASS:
-   - Update `PIPELINE.md` — Stage `[N]` → `COMPLETE`.
-   - Write `merge-approval/stage-[N]-<domain>.md`.
-   - After the PR is squash-merged to `<conductor-branch>`, for every `PENDING` stage whose `Depends On` is now fully `COMPLETE`, update `PIPELINE.md` → `IN_PROGRESS` and write `tasks/stage-[M]-<domain>.md`.
+1. อ่าน `gate-out/stage-[N]-<domain>.md`
+2. PASS เมื่อ: `status: PASS`, `ready_for_next: YES`, acceptance criteria ครบ, ไม่มี blocking issues, SECURITY_RULES.md ผ่าน
+3. REJECT → เขียน `rejection/stage-[N]-<domain>.md` และ halt
+4. PASS →
+   - อัพเดท `PIPELINE.md` → Stage `[N]` = `COMPLETE`
+   - เขียน `merge-approval/stage-[N]-<domain>.md`
+   - หลัง squash-merge เข้า `<conductor-branch>` — unlock `PENDING` stages ที่ deps ครบ
+
+---
+
+## Version Policy
+
+Workers ต้องตรวจ version จริงก่อน install ทุกครั้ง — ห้ามใช้ version จาก training data:
+
+```bash
+npm info <package> version   # Node
+pip index versions <package> # Python
+cargo search <package>       # Rust
+```
+
+Bootstrap ต้องใช้ `@latest` เสมอ:
+
+```bash
+npm create vite@latest
+npx create-next-app@latest
+npx create-expo-app@latest
+```
+
+**ยกเว้น:** package ที่อยู่ใน **Pinned Versions** table ใน `DECISIONS.md` — ใช้ version นั้นเป๊ะ ห้ามใช้ `@latest`
+Pinned Versions แก้ได้เฉพาะ Dev เท่านั้น และต้อง log ใน `DEV_LOG.md`
+
+---
 
 ## Dev direct edits
 
-When Dev edits any governance or source file directly:
+เมื่อ Dev แก้ไฟล์โดยตรง:
+1. Dev เพิ่ม entry ใน `DEV_LOG.md`
+2. Conductor อ่าน `DEV_LOG.md` และ reconcile `ROADMAP.md`, `PROJECT.md`, `PIPELINE.md`
 
-1. Dev adds an entry to `DEV_LOG.md`.
-2. After the edit, Conductor reads `DEV_LOG.md` and reconciles:
-   - `ROADMAP.md` — Current Progress / Next Steps
-   - `PROJECT.md` — Current Stage / Status (if affected)
-   - `PIPELINE.md` — stages (if affected)
+---
 
 ## Conductor-only work
 
-Some tasks (cross-stage integration, end-to-end tests, hardware access) must never be dispatched to a worker. Mark these `Owner: CONDUCTOR` in `PIPELINE.md` and `tasks/stage-[N]-<domain>.md`.
+งานที่ต้องทำเอง (cross-stage integration, e2e tests, hardware access) — mark `Owner: CONDUCTOR` ใน `PIPELINE.md`
+
+---
 
 ## ADRs
-
-Before creating a new ADR, run:
 
 ```bash
 ls docs/adrs/ | sort | tail -3
 ```
 
-Take the highest number, add 1, and name the file `NNN-short-slug.md` with a matching `# ADR NNN — Title` header inside.
+เอา number สูงสุด +1 ตั้งชื่อ `NNN-short-slug.md` พร้อม header `# ADR NNN — Title`
+
+---
 
 ## Key rules at a glance
 
-- One stage = one branch = one PR = one merge into `<conductor-branch>`.
-- A stage's `Depends On` (in `PIPELINE.md`) lists the stages it must wait for. `Depends On: none` (or already-`COMPLETE` deps) means it can run in parallel with other independent stages.
-- A `COMPLETE` stage is immutable — bugs become new stages, not edits.
-- Workers may NOT edit any governance file (see `GOVERNANCE_CORE.md` ownership table).
-- Security violations → `Status: FAIL`, `Ready For Next Stage: NO` (see `SECURITY_RULES.md`).
-- Never push build artifact directories (`target/`, `node_modules/`, `dist/`, `build/`, `.next/`, `__pycache__/`, `.venv/`, `vendor/`, ...).
+- **Setup gate** — ตอบ QUESTIONS.md และผ่าน Setup Test ก่อนเริ่ม pipeline
+- **PRE-FLIGHT** — `<conductor-branch>` เป็น placeholder → BLOCKED ทันที
+- One stage = one branch = one PR = one merge into `<conductor-branch>`
+- `COMPLETE` stage เป็น immutable — bug → new stage, ไม่ใช่ edit
+- Workers ห้ามแก้ governance files ทุกไฟล์
+- Version ต้องตรวจ runtime เสมอ — training-data version = ไม่น่าเชื่อถือ
+- Security violation → `Status: FAIL`, `Ready For Next Stage: NO`
+- ห้าม commit build artifacts (`node_modules/`, `dist/`, `build/`, `.next/`, `target/`, `__pycache__/`, `.venv/`, `vendor/`)
 
-For the full rule set, read `AGENT_RULES.md`. For the full authority model, read `GOVERNANCE_CORE.md`.
+Full rules → `AGENT_RULES.md` | Authority model → `GOVERNANCE_CORE.md` | Setup → `QUESTIONS.md`
