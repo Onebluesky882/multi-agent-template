@@ -46,7 +46,9 @@ DECISIONS.md is authoritative. Workers must use approved technologies and must N
 
 Version Policy — MANDATORY
 
-Workers must use the latest stable version of every package unless DECISIONS.md explicitly pins a version.
+Workers must use the latest stable version of every package unless the package appears in the **Pinned Versions** table in DECISIONS.md.
+
+If a package is pinned: use the exact version in that table. Do NOT upgrade, downgrade, or substitute. Do NOT run `@latest` for pinned packages.
 
 **Workers may NOT rely on memory or training data for version numbers** — versions known at training time are outdated. Always verify at runtime.
 
@@ -73,7 +75,8 @@ npx create-next-app@latest
 
 Violations that result in Status: FAIL:
 * installing a package without running the version check above
-* using a pinned version not declared in DECISIONS.md
+* using a pinned version not declared in DECISIONS.md Pinned Versions table
+* ignoring a pinned version and using @latest instead
 * bootstrapping from a template without `@latest`
 * claiming "latest" without evidence from the check command
 

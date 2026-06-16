@@ -41,10 +41,21 @@ See AGENT_RULES.md → Version Policy for enforcement rules and violation conseq
 
 ## Pinned Versions
 
-<!-- List packages that must use a specific version, overriding the @latest rule -->
-<!-- Format: package@version — reason -->
+**Authority: Dev only.** Only Dev may add, change, or remove entries here. Conductor and Workers may NOT modify this table. Any change must be logged in DEV_LOG.md.
 
-(none — all packages use @latest unless added here)
+When a package appears in this table, workers must use the exact version specified — the `@latest` rule does NOT apply. Workers may not upgrade or downgrade without Dev approval.
+
+Format:
+
+| Package | Pinned Version | Reason | Pinned By | Date |
+|---------|---------------|--------|-----------|------|
+| example: react | 18.3.1 | stability — v19 breaking changes not yet assessed | Dev | 2026-06-16 |
+
+Pinned Versions:
+
+| Package | Pinned Version | Reason | Pinned By | Date |
+|---------|---------------|--------|-----------|------|
+| (none) | — | all packages use @latest | — | — |
 
 ⸻
 
