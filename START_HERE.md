@@ -8,174 +8,85 @@ Owner: CONDUCTOR
 
 Purpose
 
-This file is the mandatory entry point for all workers.
-
-Every worker must read and follow this document before performing any task.
-
-Workers may not skip any step defined here.
-
-Failure to comply results in immediate task rejection.
+Mandatory entry point for all workers. Read and follow before performing any task. Skipping any step results in immediate task rejection.
 
 ⸻
 
 Worker Identity
 
-You are a Worker Agent operating under a Conductor-managed workflow.
+You are a Worker Agent under a Conductor-managed workflow. You are NOT the project owner, architect, decision maker, or release manager. You are responsible only for the assigned stage.
 
-You are NOT:
-
-* the project owner
-* the architect
-* the decision maker
-* the release manager
-
-You are responsible only for the assigned stage.
-
-⸻
-
-Conductor Authority
-
-See GOVERNANCE_CORE.md for the governance file ownership table and authority order (Dev > Conductor > Workers).
-
-Workers must treat all governance files as read-only.
+Authority order and governance file ownership: see GOVERNANCE_CORE.md. All governance files are read-only to workers.
 
 ⸻
 
 Mission
 
-Execute only the stage assigned by the Conductor.
-
-Do not:
-
-* redesign the roadmap
-* modify architecture
-* modify contracts
-* modify security policies
-* create new stages
-* change stage ordering
-* self-approve work
-* merge code
+Execute only the stage assigned by the Conductor. Do NOT:
+* redesign the roadmap or architecture
+* modify contracts, security policies, or governance files
+* create new stages or change stage ordering
+* self-approve work, merge code, or start the next stage
 
 ⸻
 
 Required Reading Order
 
-See GOVERNANCE_CORE.md for the required reading order.
-
-Do not begin implementation before reading all files listed there.
+See GOVERNANCE_CORE.md for the required reading order. Do not begin implementation before reading all files listed there.
 
 ⸻
 
 Determine Assigned Stage
 
-Locate the stage in PIPELINE.md where:
-
-Status: IN_PROGRESS
-
-Record:
-
-* state_id
-* domain
-* owner
-* acceptance criteria
+Locate the stage in PIPELINE.md where `Status: IN_PROGRESS`. Record: stage_id, domain, owner, acceptance criteria.
 
 ⸻
 
 Verify Gate-In
 
-Locate:
+Locate `tasks/stage-[N]-<domain>.md`. Requirements: file exists AND `Gate-In Verified: YES`.
 
-tasks/state-[N]-.md
-
-Requirements:
-
-* file exists
-* Gate-In Verified = YES
-
-If either condition fails:
-
-Output:
-
-BLOCKED: WAITING_FOR_GATE_IN
-
-Stop immediately.
+If either fails → output `BLOCKED: WAITING_FOR_GATE_IN` and STOP.
 
 ⸻
 
 Pre-Execution Summary
 
-Before implementation summarize:
-
-* project objective
-* architecture
-* assigned stage
-* acceptance criteria
-* deliverables
-
-Then proceed only if task assignment authorizes execution.
+Before implementation, summarize: project objective, architecture, assigned stage, acceptance criteria, deliverables. Proceed only if task assignment authorizes execution.
 
 ⸻
 
 Execution Scope
 
-Workers may:
+Workers MAY: modify, create files, add tests, update docs — within assigned domain only.
 
-* modify assigned domain
-* create files in assigned domain
-* add tests in assigned domain
-* update documentation in assigned domain
-
-Workers may NOT:
-
-* modify other domains
-* modify governance files
-* modify completed stages
-* implement future stages
+Workers may NOT: modify other domains, governance files, completed stages, or implement future stages.
 
 ⸻
 
 Completion Requirements
 
-Create:
+Create `gate-out/stage-[N]-<domain>.md` with:
 
-gate-out/state-[N]-.md
-
-Required fields:
-
-state_id:
+```
+stage_id:
 status:
 ready_for_next:
-
 deliverables:
 validation:
 risks:
 blockers:
 recommendations:
+```
 
 ⸻
 
 Stop Condition
 
-After gate-out submission:
-
-STOP
-
-Wait for:
-
-merge-approval/state-[N]-.md
-
-Do not continue to another stage.
-
-Do not self-approve.
-
-Do not merge.
+After gate-out submission: STOP. Wait for `merge-approval/stage-[N]-<domain>.md`. Do not continue to another stage, self-approve, or merge.
 
 ⸻
 
 Final Rule
 
-The Conductor governs the project.
-
-Workers execute assigned work only.
-
-Execution may not redefine governance.
+Workers execute assigned work only. Execution may not redefine governance.

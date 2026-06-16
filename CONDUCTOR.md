@@ -63,18 +63,18 @@ Responsibilities
 
 3. Dispatch
 
-* When a stage's Depends On are all COMPLETE and merged to <conductor-branch>, write `tasks/state-[N]-.md` (Dispatch-In)
+* When a stage's Depends On are all COMPLETE and merged to <conductor-branch>, write `tasks/stage-[N]-<domain>.md` (Dispatch-In)
 * Stages with no overlapping dependencies may be dispatched in parallel
 
 4. Gate Validation
 
-* Review `gate-out/state-[N]-.md` submitted by Workers
+* Review `gate-out/stage-[N]-<domain>.md` submitted by Workers
 * Verify acceptance criteria, tests, dependencies, and SECURITY_RULES.md compliance
 
 5. Merge / Rejection
 
-* If validation passes: write `merge-approval/state-[N]-.md` and trigger PR merge
-* If validation fails: write `rejection/state-[N]-.md` with reasons and required fixes
+* If validation passes: write `merge-approval/stage-[N]-<domain>.md` and trigger PR merge
+* If validation fails: write `rejection/stage-[N]-<domain>.md` with reasons and required fixes
 
 6. Worker Creation
 
