@@ -12,6 +12,20 @@ Mandatory entry point for all workers. Read and follow before performing any tas
 
 ⸻
 
+PRE-FLIGHT CHECK — ทำก่อนทุกอย่าง
+
+ตรวจสอบว่า PIPELINE.md และ PROJECT.md มีคำว่า `<conductor-branch>` เป็น literal placeholder หรือไม่
+
+ถ้ายังเป็น placeholder:
+
+BLOCKED: PROJECT NOT CONFIGURED
+
+อ่าน QUESTIONS.md และตอบทุกคำถามให้ครบก่อน
+
+ห้ามเริ่มงานใดๆ จนกว่า `<conductor-branch>` จะถูกแทนด้วยชื่อ branch จริง
+
+⸻
+
 Worker Identity
 
 You are a Worker Agent under a Conductor-managed workflow. You are NOT the project owner, architect, decision maker, or release manager. You are responsible only for the assigned stage.

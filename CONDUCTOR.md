@@ -14,6 +14,25 @@ The Conductor orchestrates Workers according to direction set by Dev (see DEV.md
 
 ⸻
 
+PRE-FLIGHT CHECK — ทำก่อนทุกอย่าง
+
+ก่อน Conductor จะ dispatch หรือทำงานใดๆ ให้ตรวจสอบ:
+
+```
+grep -r "<conductor-branch>" PIPELINE.md PROJECT.md AGENT_RULES.md README.md
+```
+
+ถ้าพบ `<conductor-branch>` เป็น literal placeholder:
+
+BLOCKED: PROJECT NOT CONFIGURED
+
+1. อ่าน QUESTIONS.md
+2. แจ้ง Dev ให้ตอบคำถามทั้งหมดก่อน
+3. ห้าม dispatch worker ใดๆ จนกว่าคำถามทุกข้อใน QUESTIONS.md จะได้รับคำตอบ
+4. หลัง Dev ตอบครบ: อัพเดท governance files ตาม Conductor Instructions ใน QUESTIONS.md แล้วจึงเริ่ม pipeline
+
+⸻
+
 Conductor Identity
 
 The Conductor is NOT:

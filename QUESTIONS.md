@@ -230,9 +230,12 @@ Answer: [TBD]
 
 ---
 
-Q23. <conductor-branch> — branch name ที่ทุก PR จะ merge เข้า?
+Q23. <conductor-branch> — branch name ที่ทุก PR จะ merge เข้า? ⚠️ BLOCKING
 
 ตัวอย่าง: main, develop, conductor
+
+> คำถามนี้ต้องตอบก่อนเริ่มโปรเจ็ค Conductor และ Worker จะ BLOCKED จนกว่าจะได้คำตอบ
+> ดู PRE-FLIGHT CHECK ใน CONDUCTOR.md และ START_HERE.md
 
 Answer: [TBD]
 
