@@ -319,3 +319,141 @@ Status
 - [ ] Section 6 — Roadmap: ยังไม่ตอบ
 - [ ] Section 7 — Security: ยังไม่ตอบ
 - [ ] Conductor updated all governance files: ยังไม่ทำ
+- [ ] Setup Test PASSED: ยังไม่ทำ
+
+⸻
+
+## Setup Test — รันหลัง Conductor อัพเดท governance ครบแล้ว
+
+Conductor รัน test นี้เพื่อยืนยันว่า governance พร้อมใช้งานจริง
+
+ผ่านทุกข้อ = เริ่ม pipeline ได้
+
+---
+
+### T1 — ไม่มี placeholder หลงเหลือ
+
+```bash
+grep -rn "\[TBD\]\|<conductor-branch>\|\[name\]\|\[N\]" \
+  PROJECT.md ROADMAP.md ARCHITECTURE.md CONTRACTS.md \
+  DECISIONS.md PIPELINE.md SECURITY_RULES.md AGENT_RULES.md README.md
+```
+
+ผล: ต้องไม่มี output — ถ้ามี แสดงว่ายังมีไฟล์ที่ยังไม่ได้อัพเดท
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T2 — conductor-branch มีอยู่จริงใน git
+
+```bash
+git branch -a | grep -F "<ใส่ชื่อ conductor-branch จริงที่ตอบใน Q23>"
+```
+
+ผล: ต้องพบ branch นั้น — ถ้าไม่พบให้ Conductor สร้าง branch ก่อน
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T3 — PROJECT.md มีข้อมูลจริง
+
+ตรวจสอบด้วยตา:
+- [ ] มีชื่อโปรเจ็คจริง (ไม่ใช่ "My Project" หรือ placeholder)
+- [ ] มี description อธิบาย core problem
+- [ ] มี target users
+- [ ] มี status ปัจจุบัน
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T4 — DECISIONS.md มี tech stack ครบ
+
+ตรวจสอบด้วยตา:
+- [ ] ภาษาหลัก
+- [ ] Frontend framework (หรือระบุว่า API-only)
+- [ ] Backend framework (หรือระบุว่า frontend-only)
+- [ ] Database (หรือระบุว่าไม่มี)
+- [ ] Authentication method
+- [ ] Package manager
+- [ ] Testing framework
+- [ ] Linting/formatting tools
+- [ ] Naming conventions
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T5 — PIPELINE.md มี stages จริง
+
+```bash
+grep -c "Stage\|PENDING\|IN_PROGRESS" PIPELINE.md
+```
+
+ผล: ต้องได้ค่ามากกว่า 0
+
+ตรวจสอบด้วยตา:
+- [ ] มี stage อย่างน้อย 1 stage
+- [ ] ทุก stage มี `Depends On` ระบุ
+- [ ] `<conductor-branch>` ถูกแทนด้วยชื่อจริงแล้ว
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T6 — ARCHITECTURE.md และ CONTRACTS.md ไม่ว่างเปล่า
+
+```bash
+wc -l ARCHITECTURE.md CONTRACTS.md
+```
+
+ผล: ทั้งสองไฟล์ต้องมีมากกว่า 10 บรรทัด
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T7 — DEV_LOG.md มี entry บันทึกการ setup
+
+ตรวจสอบด้วยตา:
+- [ ] มีอย่างน้อย 1 entry ที่บันทึกการอัพเดท governance จาก QUESTIONS.md
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### T8 — Worker simulation (ทำได้ไหม)
+
+Conductor ส่ง prompt นี้ให้ Worker agent ใหม่:
+
+> "อ่าน START_HERE.md แล้วรายงานว่าโปรเจ็คนี้คือโปรเจ็คอะไร tech stack คืออะไร และ stage แรกที่ต้องทำคืออะไร"
+
+ผล Worker ต้องตอบได้ถูกต้องโดยไม่ต้องถาม Dev
+
+- [ ] Worker ตอบชื่อโปรเจ็คถูก
+- [ ] Worker ตอบ tech stack ถูก
+- [ ] Worker ระบุ stage แรกได้
+- [ ] Worker ไม่ติด BLOCKED
+
+Result: [ ] PASS / [ ] FAIL
+
+---
+
+### Test Summary
+
+| Test | Result |
+|------|--------|
+| T1 — ไม่มี placeholder | |
+| T2 — conductor-branch มีใน git | |
+| T3 — PROJECT.md ครบ | |
+| T4 — DECISIONS.md ครบ | |
+| T5 — PIPELINE.md ครบ | |
+| T6 — ARCHITECTURE.md / CONTRACTS.md ไม่ว่าง | |
+| T7 — DEV_LOG.md มี entry | |
+| T8 — Worker simulation | |
+
+ผ่านทั้งหมด → อัพเดท Status checklist ด้านบน แล้วเริ่ม pipeline ได้
+
+มี FAIL → แก้ไขและรัน test นั้นซ้ำก่อนเริ่ม pipeline
