@@ -8,22 +8,27 @@ Owner: CONDUCTOR
 
 Purpose
 
-ตอบคำถามทั้งหมดนี้ก่อนเริ่มใช้ template นี้กับโปรเจ็คจริง
-
-Conductor จะนำคำตอบไปอัพเดทไฟล์ governance ที่เกี่ยวข้องโดยอัตโนมัติ
-
-⸻
-
-วิธีใช้
-
-1. ผู้ใช้ตอบทุกคำถาม (ใส่คำตอบแทน [TBD])
-2. แจ้ง Conductor ว่า QUESTIONS.md อัพเดทแล้ว
-3. Conductor อ่านคำตอบและอัพเดทไฟล์ governance ตาม "→ อัพเดทไฟล์" ที่ระบุไว้
+เก็บข้อมูลที่ Conductor ต้องรู้ก่อนเริ่ม pipeline
+Conductor จะถามทีละข้อ รอคำตอบ แล้วเสนอ recommendation สำหรับส่วนที่เหลือ
 
 ⸻
 
-## Section 1 — Project Identity
-→ อัพเดทไฟล์: PROJECT.md
+วิธีใช้ — Conductor-led Setup
+
+กฎสำหรับ Conductor:
+1. ถามทีละข้อเท่านั้น — ห้ามถามหลายข้อพร้อมกัน
+2. รอคำตอบก่อนถามข้อถัดไป
+3. หลังได้คำตอบ Q1–Q4: เสนอ Tech Stack Recommendation แทนที่จะถาม Q5–Q11 ทีละข้อ
+4. Dev ยืนยัน หรือบอกสิ่งที่ต้องการเปลี่ยน
+5. บันทึกคำตอบทั้งหมดลงไฟล์นี้ก่อนอัพเดท governance files
+
+รูปแบบการถาม:
+> **[Q1]** ชื่อโปรเจ็คคืออะไร?
+
+⸻
+
+## Part 1 — สิ่งที่เฉพาะ Dev รู้ (ต้องถาม)
+→ ถามทีละข้อ Q1 → Q6
 
 Q1. ชื่อโปรเจ็คคืออะไร?
 
@@ -31,19 +36,26 @@ Answer: [TBD]
 
 ---
 
-Q2. โปรเจ็คนี้ทำอะไร? (อธิบายสั้นๆ 1-3 ประโยค — core problem ที่แก้)
+Q2. โปรเจ็คนี้ทำอะไร และ target users คือใคร?
+(อธิบายสั้นๆ — core problem + คนที่ใช้งาน)
 
 Answer: [TBD]
 
 ---
 
-Q3. ผู้ใช้งานหลัก (target users) คือใคร?
+Q3. ประเภทโปรเจ็ค?
+
+- [ ] Web full-stack (frontend + backend)
+- [ ] Web frontend-only
+- [ ] API / Backend-only
+- [ ] Mobile (iOS/Android)
+- [ ] อื่นๆ: ___
 
 Answer: [TBD]
 
 ---
 
-Q4. สถานะปัจจุบันของโปรเจ็ค?
+Q4. สถานะปัจจุบัน?
 
 - [ ] Greenfield (เริ่มใหม่)
 - [ ] Existing codebase (ต่อยอดของเดิม)
@@ -51,243 +63,106 @@ Q4. สถานะปัจจุบันของโปรเจ็ค?
 
 Answer: [TBD]
 
-⸻
-
-## Section 2 — Tech Stack
-→ อัพเดทไฟล์: DECISIONS.md
-
-Q5. ภาษาหลักที่ใช้?
-
-Answer: [TBD]
-
 ---
 
-Q6. Frontend framework?
-
-ตัวอย่าง: Next.js, React, Vue, SvelteKit, React Native, Expo, ไม่มี (API-only)
-
-Answer: [TBD]
-
----
-
-Q7. Backend framework?
-
-ตัวอย่าง: Express, Fastify, FastAPI, Django, NestJS, Hono, ไม่มี (frontend-only)
-
-Answer: [TBD]
-
----
-
-Q8. Database?
-
-ตัวอย่าง: PostgreSQL, MySQL, MongoDB, SQLite, Supabase, PlanetScale, ไม่มี
-
-Answer: [TBD]
-
----
-
-Q9. Authentication / Authorization?
-
-ตัวอย่าง: JWT, NextAuth, Clerk, Supabase Auth, Firebase Auth, OAuth2, ไม่มี
-
-Answer: [TBD]
-
----
-
-Q10. Deployment platform?
-
-ตัวอย่าง: Vercel, Railway, AWS, GCP, Fly.io, Docker self-hosted
-
-Answer: [TBD]
-
----
-
-Q11. Package manager?
-
-- [ ] npm
-- [ ] yarn
-- [ ] pnpm
-- [ ] bun
-
-Answer: [TBD]
-
-⸻
-
-## Section 3 — Architecture & Structure
-→ อัพเดทไฟล์: ARCHITECTURE.md, CONTRACTS.md
-
-Q12. รูปแบบ architecture คืออะไร?
-
-ตัวอย่าง: Monolith, Monorepo (Turborepo/Nx), Microservices, Serverless, Full-stack SSR
-
-Answer: [TBD]
-
----
-
-Q13. โปรเจ็คแบ่งออกเป็น modules/domains อะไรบ้าง?
-
-ตัวอย่าง: auth, user, product, payment, notification, admin
-
-Answer: [TBD]
-
----
-
-Q14. มี external services หรือ third-party APIs ที่ต้องใช้ไหม?
-
-ตัวอย่าง: Stripe, SendGrid, Twilio, AWS S3, OpenAI API
-
-Answer: [TBD]
-
----
-
-Q15. โครงสร้าง folder ที่ต้องการ?
-
-ตัวอย่าง:
-```
-src/
-  app/        (Next.js App Router)
-  components/
-  lib/
-  server/
-```
-
-Answer: [TBD]
-
-⸻
-
-## Section 4 — Code Style & Patterns
-→ อัพเดทไฟล์: DECISIONS.md
-
-Q16. Linting / Formatting tools?
-
-ตัวอย่าง: ESLint + Prettier, Biome, Ruff (Python)
-
-Answer: [TBD]
-
----
-
-Q17. รูปแบบการตั้งชื่อ (naming conventions)?
-
-ตัวอย่าง:
-- Components: PascalCase
-- Functions/variables: camelCase
-- Files: kebab-case
-- Constants: UPPER_SNAKE_CASE
-
-Answer: [TBD]
-
----
-
-Q18. Testing framework?
-
-ตัวอย่าง: Vitest, Jest, Playwright, Cypress, pytest
-
-Answer: [TBD]
-
----
-
-Q19. State management (ถ้ามี frontend)?
-
-ตัวอย่าง: Zustand, Jotai, Redux Toolkit, TanStack Query, Context API, ไม่มี
-
-Answer: [TBD]
-
----
-
-Q20. TypeScript ใช้ไหม?
-
-- [ ] Yes — strict mode
-- [ ] Yes — relaxed
-- [ ] No
-
-Answer: [TBD]
-
-⸻
-
-## Section 5 — Pipeline & Stages
-→ อัพเดทไฟล์: PIPELINE.md
-
-Q21. รายการ stages ที่ต้องการ build (เรียงตามลำดับ)?
-
-ตัวอย่าง:
-```
-Stage 1 — setup       (project scaffold, config)
-Stage 2 — auth        (login, register, session)
-Stage 3 — user        (profile, settings)
-Stage 4 — core        (main feature)
-Stage 5 — api         (REST endpoints)
-Stage 6 — ui          (pages, components)
-Stage 7 — tests       (e2e, integration)
-```
-
-Answer: [TBD]
-
----
-
-Q22. Stages ไหนทำพร้อมกันได้ (parallel)?
-
-Answer: [TBD]
-
----
-
-Q23. <conductor-branch> — branch name ที่ทุก PR จะ merge เข้า? ⚠️ BLOCKING
+Q5. conductor-branch — branch name ที่ทุก PR จะ merge เข้า? ⚠️ BLOCKING
 
 ตัวอย่าง: main, develop, conductor
 
-> คำถามนี้ต้องตอบก่อนเริ่มโปรเจ็ค Conductor และ Worker จะ BLOCKED จนกว่าจะได้คำตอบ
-> ดู PRE-FLIGHT CHECK ใน CONDUCTOR.md และ START_HERE.md
+> Conductor และ Worker จะ BLOCKED จนกว่าจะได้คำตอบข้อนี้
+
+Answer: [TBD]
+
+---
+
+Q6. Pipeline stages ที่ต้องการ build มีอะไรบ้าง? (เรียงตามลำดับ)
+
+ตัวอย่าง:
+```
+Stage 1 — setup    (scaffold, config)
+Stage 2 — auth     (login, register)
+Stage 3 — core     (main feature)
+Stage 4 — ui       (pages, components)
+Stage 5 — tests    (e2e, integration)
+```
 
 Answer: [TBD]
 
 ⸻
 
-## Section 6 — Roadmap & Goals
-→ อัพเดทไฟล์: ROADMAP.md
+## Part 2 — Tech Stack Recommendation (Conductor เสนอ)
 
-Q24. เป้าหมายระยะสั้น (1-4 สัปดาห์)?
+หลังได้คำตอบ Q1–Q4 ให้ Conductor:
 
-Answer: [TBD]
-
----
-
-Q25. เป้าหมายระยะยาว (vision)?
-
-Answer: [TBD]
+1. เสนอ recommendation ตาม template ด้านล่าง
+2. ถาม Dev ว่า "ต้องการเปลี่ยนอะไรไหม?"
+3. บันทึกที่ตกลงกันลงใน Answer ด้านล่าง
 
 ---
 
-Q26. Milestone แรกที่ถือว่า "done" คืออะไร?
+### Recommendation Templates (Conductor เลือกตาม Q3)
 
-ตัวอย่าง: MVP ที่ user login และใช้ core feature ได้
+**Web full-stack:**
+```
+แนะนำ:
+- Language:     TypeScript (strict)
+- Frontend:     Next.js (App Router)
+- Backend:      Next.js API Routes / Hono
+- Database:     PostgreSQL + Prisma
+- Auth:         NextAuth v5
+- Deployment:   Vercel
+- Package mgr:  pnpm
+- Linting:      ESLint + Prettier
+- Testing:      Vitest + Playwright
+- State:        TanStack Query
+- Naming:       Components PascalCase, functions camelCase, files kebab-case
+```
 
-Answer: [TBD]
+**Web frontend-only:**
+```
+แนะนำ:
+- Language:     TypeScript (strict)
+- Frontend:     Next.js (App Router) หรือ Vite + React
+- Deployment:   Vercel / Netlify
+- Package mgr:  pnpm
+- Linting:      ESLint + Prettier
+- Testing:      Vitest + Playwright
+- State:        TanStack Query + Zustand
+- Naming:       Components PascalCase, functions camelCase, files kebab-case
+```
 
-⸻
+**API / Backend-only:**
+```
+แนะนำ:
+- Language:     TypeScript (strict)
+- Backend:      Hono หรือ Fastify
+- Database:     PostgreSQL + Prisma
+- Auth:         JWT
+- Deployment:   Railway / Fly.io
+- Package mgr:  pnpm
+- Linting:      ESLint + Prettier
+- Testing:      Vitest
+- Naming:       functions camelCase, files kebab-case
+```
 
-## Section 7 — Security & Environment
-→ อัพเดทไฟล์: SECURITY_RULES.md
-
-Q27. ข้อมูล sensitive ที่โปรเจ็คนี้จัดการ?
-
-ตัวอย่าง: user PII, payment data, health records, ไม่มี
-
-Answer: [TBD]
+**Mobile:**
+```
+แนะนำ:
+- Language:     TypeScript (strict)
+- Framework:    Expo (React Native)
+- Backend:      Hono (separate service)
+- Auth:         Clerk หรือ Supabase Auth
+- Package mgr:  pnpm
+- Linting:      ESLint + Prettier
+- Testing:      Jest
+- State:        Zustand + TanStack Query
+```
 
 ---
 
-Q28. มี environment แยกกันไหม?
+### Agreed Tech Stack
 
-- [ ] dev / staging / production
-- [ ] dev / production
-- [ ] development only
-
-Answer: [TBD]
-
----
-
-Q29. มี compliance requirement พิเศษไหม?
-
-ตัวอย่าง: PDPA, GDPR, PCI-DSS, HIPAA, ไม่มี
+(Conductor บันทึกที่นี่หลัง Dev ยืนยัน)
 
 Answer: [TBD]
 
@@ -295,37 +170,30 @@ Answer: [TBD]
 
 ## Conductor Instructions
 
-หลังจากผู้ใช้ตอบคำถามครบ ให้ Conductor:
+หลังจาก Dev ตอบครบและยืนยัน Tech Stack แล้ว ให้ Conductor:
 
 1. PROJECT.md — อัพเดท: name, description, target users, status (จาก Q1–Q4)
-2. DECISIONS.md — อัพเดท: tech stack ทั้งหมด, naming conventions, testing, code style (จาก Q5–Q20)
-3. ARCHITECTURE.md — อัพเดท: architecture type, modules, external services, folder structure (จาก Q12–Q15)
-4. CONTRACTS.md — สร้าง contract เบื้องต้นสำหรับแต่ละ module (จาก Q13–Q14)
-5. PIPELINE.md — สร้าง stage list, Depends On, conductor-branch (จาก Q21–Q23)
-6. ROADMAP.md — อัพเดท: goals, vision, milestone (จาก Q24–Q26)
-7. SECURITY_RULES.md — เพิ่ม/แก้ไข rules ให้ตรงกับ sensitive data และ compliance (จาก Q27–Q29)
-8. ทุก `<conductor-branch>` ใน AGENT_RULES.md, README.md — แทนด้วยชื่อ branch จริง (จาก Q23)
+2. DECISIONS.md — อัพเดท: tech stack ทั้งหมด, naming conventions, testing, code style (จาก Agreed Tech Stack)
+3. ARCHITECTURE.md — อัพเดท: architecture type, folder structure ที่เหมาะกับ stack
+4. CONTRACTS.md — สร้าง contract เบื้องต้นตาม stages ใน Q6
+5. PIPELINE.md — สร้าง stage list, Depends On, conductor-branch (จาก Q5–Q6)
+6. ROADMAP.md — อัพเดท: goals และ milestone แรกจาก Q2 + Q6
+7. SECURITY_RULES.md — เพิ่ม rules ตาม project type และ data sensitivity ที่ระบุใน Q2
+8. ทุก `<conductor-branch>` ใน AGENT_RULES.md, README.md — แทนด้วยชื่อจริง (จาก Q5)
 9. บันทึกการเปลี่ยนแปลงใน DEV_LOG.md
 
 ⸻
 
 Status
 
-- [ ] Section 1 — Project Identity: ยังไม่ตอบ
-- [ ] Section 2 — Tech Stack: ยังไม่ตอบ
-- [ ] Section 3 — Architecture: ยังไม่ตอบ
-- [ ] Section 4 — Code Style: ยังไม่ตอบ
-- [ ] Section 5 — Pipeline: ยังไม่ตอบ
-- [ ] Section 6 — Roadmap: ยังไม่ตอบ
-- [ ] Section 7 — Security: ยังไม่ตอบ
-- [ ] Conductor updated all governance files: ยังไม่ทำ
-- [ ] Setup Test PASSED: ยังไม่ทำ
+- [ ] Q1–Q6 ตอบครบ
+- [ ] Tech Stack ยืนยันแล้ว
+- [ ] Conductor updated all governance files
+- [ ] Setup Test PASSED
 
 ⸻
 
 ## Setup Test — รันหลัง Conductor อัพเดท governance ครบแล้ว
-
-Conductor รัน test นี้เพื่อยืนยันว่า governance พร้อมใช้งานจริง
 
 ผ่านทุกข้อ = เริ่ม pipeline ได้
 
@@ -339,7 +207,7 @@ grep -rn "\[TBD\]\|<conductor-branch>\|\[name\]\|\[N\]" \
   DECISIONS.md PIPELINE.md SECURITY_RULES.md AGENT_RULES.md README.md
 ```
 
-ผล: ต้องไม่มี output — ถ้ามี แสดงว่ายังมีไฟล์ที่ยังไม่ได้อัพเดท
+ผล: ต้องไม่มี output
 
 Result: [ ] PASS / [ ] FAIL
 
@@ -348,7 +216,7 @@ Result: [ ] PASS / [ ] FAIL
 ### T2 — conductor-branch มีอยู่จริงใน git
 
 ```bash
-git branch -a | grep -F "<ใส่ชื่อ conductor-branch จริงที่ตอบใน Q23>"
+git branch -a | grep -F "<ใส่ชื่อ conductor-branch จริงที่ตอบใน Q5>"
 ```
 
 ผล: ต้องพบ branch นั้น — ถ้าไม่พบให้ Conductor สร้าง branch ก่อน
@@ -360,7 +228,7 @@ Result: [ ] PASS / [ ] FAIL
 ### T3 — PROJECT.md มีข้อมูลจริง
 
 ตรวจสอบด้วยตา:
-- [ ] มีชื่อโปรเจ็คจริง (ไม่ใช่ "My Project" หรือ placeholder)
+- [ ] มีชื่อโปรเจ็คจริง
 - [ ] มี description อธิบาย core problem
 - [ ] มี target users
 - [ ] มี status ปัจจุบัน
@@ -373,8 +241,7 @@ Result: [ ] PASS / [ ] FAIL
 
 ตรวจสอบด้วยตา:
 - [ ] ภาษาหลัก
-- [ ] Frontend framework (หรือระบุว่า API-only)
-- [ ] Backend framework (หรือระบุว่า frontend-only)
+- [ ] Frontend / Backend framework (หรือระบุว่าไม่มี)
 - [ ] Database (หรือระบุว่าไม่มี)
 - [ ] Authentication method
 - [ ] Package manager
@@ -424,14 +291,13 @@ Result: [ ] PASS / [ ] FAIL
 
 ---
 
-### T8 — Worker simulation (ทำได้ไหม)
+### T8 — Worker simulation
 
 Conductor ส่ง prompt นี้ให้ Worker agent ใหม่:
 
 > "อ่าน START_HERE.md แล้วรายงานว่าโปรเจ็คนี้คือโปรเจ็คอะไร tech stack คืออะไร และ stage แรกที่ต้องทำคืออะไร"
 
-ผล Worker ต้องตอบได้ถูกต้องโดยไม่ต้องถาม Dev
-
+ผล Worker ต้องตอบได้ถูกต้องโดยไม่ต้องถาม Dev:
 - [ ] Worker ตอบชื่อโปรเจ็คถูก
 - [ ] Worker ตอบ tech stack ถูก
 - [ ] Worker ระบุ stage แรกได้

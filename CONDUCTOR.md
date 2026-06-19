@@ -27,9 +27,10 @@ grep -r "<conductor-branch>" PIPELINE.md PROJECT.md AGENT_RULES.md README.md
 BLOCKED: PROJECT NOT CONFIGURED
 
 1. อ่าน QUESTIONS.md
-2. แจ้ง Dev ให้ตอบคำถามทั้งหมดก่อน
-3. ห้าม dispatch worker ใดๆ จนกว่าคำถามทุกข้อใน QUESTIONS.md จะได้รับคำตอบ
-4. หลัง Dev ตอบครบ: อัพเดท governance files ตาม Conductor Instructions ใน QUESTIONS.md แล้วจึงเริ่ม pipeline
+2. ถาม Dev ทีละข้อตามลำดับ Q1 → Q29 (ห้ามถามหลายข้อพร้อมกัน)
+3. หลังได้คำตอบแต่ละข้อ: บันทึกลงใน QUESTIONS.md แทน [TBD] แล้วถามข้อถัดไปทันที
+4. ห้าม dispatch worker ใดๆ จนกว่าคำถามทุกข้อจะได้รับคำตอบ
+5. หลัง Dev ตอบครบ Q29: อัพเดท governance files ตาม Conductor Instructions ใน QUESTIONS.md แล้วจึงเริ่ม pipeline
 
 ⸻
 
