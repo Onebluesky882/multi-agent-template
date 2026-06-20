@@ -95,3 +95,35 @@ Authority Order
 Dev > Conductor > Workers.
 
 Workers execute. Conductor coordinates. Dev directs.
+
+⸻
+
+Write Gate (license_status)
+
+All AI file writes (Edit, Write, NotebookEdit) are gated by `.claude/license_status`.
+
+| Value | Effect |
+|-------|--------|
+| `ACTIVE` | writes allowed |
+| `SUSPENDED` | all writes blocked immediately |
+| `REVIEW` | all writes blocked immediately |
+
+Dev is the only authority who may change this file. To pause all AI writing instantly:
+
+```bash
+echo "SUSPENDED" > .claude/license_status
+```
+
+To restore:
+
+```bash
+echo "ACTIVE" > .claude/license_status
+```
+
+This is enforced by `.claude/hooks/check-license.sh` (PreToolUse hook). It is not advisory — writes will hard-fail when status ≠ ACTIVE.
+
+⸻
+
+Type-Check Gate (gate-out)
+
+Writing any file under `gate-out/` triggers `.claude/hooks/gate-out-typecheck.sh`, which runs `pnpm type-check` in the repo root. If type-check fails, the gate-out write is rejected. Workers may not self-report type-check results — the hook is the only valid evidence.

@@ -1,5 +1,24 @@
 # PIPELINE.md
 
+## Worktree Rule — MANDATORY
+
+Each stage runs in its own git worktree on its own branch. One worktree = one stage = one branch. No exceptions.
+
+**Conductor creates worktrees before dispatching:**
+```bash
+git worktree add ../worktrees/stage-1-<name> -b stage-1-<name>
+git worktree add ../worktrees/stage-2-<name> -b stage-2-<name>
+```
+
+**Workers must NOT:**
+- Work on `main` directly
+- Share a worktree with another stage
+- Cross-write files owned by another stage's domain
+
+**Why:** parallel stages running in the same working tree will corrupt each other's gate-out, type-check state, and branch history. Worktrees are the only safe parallel execution model.
+
+⸻
+
 ## Stages
 
 | State | Domain | Depends On | Status |

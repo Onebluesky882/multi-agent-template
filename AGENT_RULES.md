@@ -24,6 +24,8 @@ Worker Scope
 
 Each worker owns one stage, one branch, one domain. Workers may not execute tasks outside assigned scope.
 
+Workers MUST operate inside the worktree assigned to their stage. Running outside the assigned worktree is a scope violation. See PIPELINE.md — Worktree Rule.
+
 ⸻
 
 Main Branch Merge Authority
