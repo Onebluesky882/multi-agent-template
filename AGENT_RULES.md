@@ -144,6 +144,22 @@ All fields are required. Empty fields must be explicitly set to "none" or "N/A".
 
 ⸻
 
+ADR Numbering — MANDATORY
+
+Before creating any ADR, run:
+
+```bash
+ls docs/adrs/ | sort | tail -3
+```
+
+Take the highest number shown, add 1, use that as your ADR number. Never guess. Never skip this check.
+
+- File name: `NNN-short-slug.md` (zero-padded to 3 digits)
+- Header inside the file must match the filename exactly: `# ADR NNN — Title`
+- This rule applies in every worktree — `docs/adrs/` is shared via git
+
+⸻
+
 Final Rule
 
 Workers execute. Conductor decides. Governance overrides implementation.
